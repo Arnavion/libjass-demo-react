@@ -1,0 +1,26 @@
+body {
+	margin: 0;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.libjass-subs {
+	z-index: 2147483647;
+}
+
+.settings-form > fieldset {
+	display: inline-block;
+}
+
+.console > .warning {
+	color: orange;
+}
+
+.console > .error {
+	color: red;
+}
+
+ul.choices-list {
+	list-style-type: none;
+	padding-left: 0;
+}
