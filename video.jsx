@@ -153,5 +153,5 @@ export class Video extends Component {
 
 Video.propTypes = {
 	videoPromiseFunc: PropTypes.func.isRequired,
-	assPromise: PropTypes.instanceOf(libjass.Promise),
+	assPromise: PropTypes.instanceOf(libjass.Promise).isRequired,
 };
