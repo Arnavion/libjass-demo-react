@@ -102,12 +102,10 @@ export class Options extends Component {
 									disabled={ !fileInputsEnabled }
 									checked={ this.state.videoChoice === VideoChoice.LocalFile }
 									onChange={ () => this.setState({ ...this.state, videoChoice: VideoChoice.LocalFile }) }
-								/> {
-									`Local file (The file won't be uploaded. It will be used directly within your browser.)${
-										fileInputsEnabled ?
-											"" :
-											" (This browser doesn't support URL.createObjectURL)"
-									}`
+								/> Local file (The file won't be uploaded. It will be used directly within your browser.){
+									fileInputsEnabled ?
+										"" :
+										" (This browser doesn't support URL.createObjectURL)"
 								}
 							</label>
 							<input type="file"
@@ -154,12 +152,10 @@ export class Options extends Component {
 									disabled={ !dummyVideoEnabled }
 									checked={ this.state.videoChoice === VideoChoice.Dummy }
 									onChange={ () => this.setState({ ...this.state, videoChoice: VideoChoice.Dummy }) }
-								/> {
-									`Dummy video${
-										dummyVideoEnabled ?
-											"" :
-											" (This browser doesn't support generating dummy video. Consider using Firefox 46 or newer and enabling media.mediasource.webm.enabled in about:config)"
-									}`
+								/> Dummy video{
+									dummyVideoEnabled ?
+										"" :
+										" (This browser doesn't support generating dummy video. Consider using Firefox 46 or newer and enabling media.mediasource.webm.enabled in about:config)"
 								}
 							</label>
 							<select
@@ -208,12 +204,10 @@ export class Options extends Component {
 									disabled={ !fileInputsEnabled }
 									checked={ this.state.assChoice === AssChoice.LocalFile }
 									onChange={ () => this.setState({ ...this.state, assChoice: AssChoice.LocalFile }) }
-								/> {
-									`Local file (The file won't be uploaded. It will be used directly within your browser.)${
-										fileInputsEnabled ?
-											"" :
-											" (This browser doesn't support URL.createObjectURL)"
-									}`
+								/> Local file (The file won't be uploaded. It will be used directly within your browser.){
+									fileInputsEnabled ?
+										"" :
+										" (This browser doesn't support URL.createObjectURL)"
 								}
 							</label>
 							<input type="file"

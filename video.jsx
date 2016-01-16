@@ -63,16 +63,14 @@ export class Video extends Component {
 										this.setState({ ...this.state, currentResolution: [...this.state.videoResolution] });
 										this.state.renderer.resize(this.state.videoResolution[0], this.state.videoResolution[1]);
 									} }
-								/> {
-									`Video resolution ${
-										(this.state.videoResolution !== null) ?
-											this.state.videoResolution[0] :
-											""
-									}x${
-										(this.state.videoResolution !== null) ?
-											this.state.videoResolution[1] :
-											""
-									}`
+								/> Video resolution {
+									(this.state.videoResolution !== null) ?
+										this.state.videoResolution[0] :
+										""
+								}x{
+									(this.state.videoResolution !== null) ?
+										this.state.videoResolution[1] :
+										""
 								}
 							</label>
 							<label>
@@ -81,16 +79,14 @@ export class Video extends Component {
 										this.setState({ ...this.state, currentResolution: [...this.state.assResolution] });
 										this.state.renderer.resize(this.state.assResolution[0], this.state.assResolution[1]);
 									} }
-								/> {
-									`Script resolution ${
-										(this.state.assResolution !== null) ?
-											this.state.assResolution[0] :
-											""
-									}x${
-										(this.state.assResolution !== null) ?
-											this.state.assResolution[1] :
-											""
-									}`
+								/> Script resolution {
+									(this.state.assResolution !== null) ?
+										this.state.assResolution[0] :
+										""
+								}x{
+									(this.state.assResolution !== null) ?
+										this.state.assResolution[1] :
+										""
 								}
 							</label>
 						</div>
