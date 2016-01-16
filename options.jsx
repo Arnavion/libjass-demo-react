@@ -49,7 +49,7 @@ export class Options extends Component {
 			videoUrl: null,
 			videoDummyResolution: [1280, 720],
 			videoDummyColor: "#2fa3fe",
-			videoDummyDuration: 25,
+			videoDummyDuration: 25 * 60,
 
 			assFile: null,
 			assUrl: null,
