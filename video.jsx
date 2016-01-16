@@ -41,6 +41,7 @@ export class Video extends Component {
 	render() {
 		if (this.state.renderer !== null) {
 			this.state.renderer.setEnabled(this.state.subsEnabled);
+			this.state.renderer.resize(...this.state.currentResolution);
 		}
 
 		return (
@@ -59,10 +60,9 @@ export class Video extends Component {
 							<label>
 								<input type="radio" name="video-size"
 									defaultChecked={ true }
-									onChange={ () => {
-										this.setState({ currentResolution: [...this.state.videoResolution] });
-										this.state.renderer.resize(this.state.videoResolution[0], this.state.videoResolution[1]);
-									} }
+									onChange={ () =>
+										this.setState({ currentResolution: [...this.state.videoResolution] })
+									}
 								/> Video resolution {
 									(this.state.videoResolution !== null) ?
 										this.state.videoResolution[0] :
@@ -75,10 +75,9 @@ export class Video extends Component {
 							</label>
 							<label>
 								<input type="radio" name="video-size"
-									onChange={ () => {
-										this.setState({ currentResolution: [...this.state.assResolution] });
-										this.state.renderer.resize(this.state.assResolution[0], this.state.assResolution[1]);
-									} }
+									onChange={ () =>
+										this.setState({ currentResolution: [...this.state.assResolution] })
+									}
 								/> Script resolution {
 									(this.state.assResolution !== null) ?
 										this.state.assResolution[0] :
