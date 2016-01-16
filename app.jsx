@@ -51,7 +51,7 @@ export class App extends Component {
 						case Screens.Options:
 							return (
 								<Options
-									onSelected={ (videoPromiseFunc, assPromise) => this.setState({ ...this.state, currentScreen: Screens.Video, videoPromiseFunc, assPromise }) }
+									onSelected={ (videoPromiseFunc, assPromise) => this.setState({ currentScreen: Screens.Video, videoPromiseFunc, assPromise }) }
 								/>
 							);
 

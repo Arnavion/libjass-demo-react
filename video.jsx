@@ -60,7 +60,7 @@ export class Video extends Component {
 								<input type="radio" name="video-size"
 									defaultChecked={ true }
 									onChange={ () => {
-										this.setState({ ...this.state, currentResolution: [...this.state.videoResolution] });
+										this.setState({ currentResolution: [...this.state.videoResolution] });
 										this.state.renderer.resize(this.state.videoResolution[0], this.state.videoResolution[1]);
 									} }
 								/> Video resolution {
@@ -76,7 +76,7 @@ export class Video extends Component {
 							<label>
 								<input type="radio" name="video-size"
 									onChange={ () => {
-										this.setState({ ...this.state, currentResolution: [...this.state.assResolution] });
+										this.setState({ currentResolution: [...this.state.assResolution] });
 										this.state.renderer.resize(this.state.assResolution[0], this.state.assResolution[1]);
 									} }
 								/> Script resolution {
@@ -95,7 +95,7 @@ export class Video extends Component {
 						<legend>Subtitles</legend>
 						<label><input type="checkbox"
 							checked={ this.state.subsEnabled }
-							onChange={ event => this.setState({ ...this.state, subsEnabled: event.target.checked }) }
+							onChange={ event => this.setState({ subsEnabled: event.target.checked }) }
 						/>Subtitles</label>
 					</fieldset>
 				</form>
@@ -111,7 +111,7 @@ export class Video extends Component {
 				console.log("Video metadata loaded.");
 
 				const videoResolution = [video.videoWidth, video.videoHeight];
-				this.setState({ ...this.state, videoResolution, currentResolution: [...videoResolution] });
+				this.setState({ videoResolution, currentResolution: [...videoResolution] });
 			}).catch(reason => {
 				const errorCode = (reason.code !== undefined) ? [null, "MEDIA_ERR_ABORTED", "MEDIA_ERR_NETWORK", "MEDIA_ERR_DECODE", "MEDIA_ERR_SRC_NOT_SUPPORTED"][reason.code] : "";
 				console.error("Video could not be loaded: %o %o", errorCode, reason);
@@ -124,7 +124,7 @@ export class Video extends Component {
 
 			window.ass = ass;
 
-			this.setState({ ...this.state, assResolution: [ass.properties.resolutionX, ass.properties.resolutionY] });
+			this.setState({ assResolution: [ass.properties.resolutionX, ass.properties.resolutionY] });
 
 			return ass;
 		}).catch(reason => {
@@ -147,7 +147,7 @@ export class Video extends Component {
 
 			renderer.resize(...this.state.currentResolution);
 
-			this.setState({ ...this.state, renderer });
+			this.setState({ renderer });
 		});
 	}
 };

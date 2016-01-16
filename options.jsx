@@ -101,7 +101,7 @@ export class Options extends Component {
 								<input type="radio" name="video-choice"
 									disabled={ !fileInputsEnabled }
 									checked={ this.state.videoChoice === VideoChoice.LocalFile }
-									onChange={ () => this.setState({ ...this.state, videoChoice: VideoChoice.LocalFile }) }
+									onChange={ () => this.setState({ videoChoice: VideoChoice.LocalFile }) }
 								/> Local file (The file won't be uploaded. It will be used directly within your browser.){
 									fileInputsEnabled ?
 										"" :
@@ -112,7 +112,7 @@ export class Options extends Component {
 								disabled={ !fileInputsEnabled }
 								defaultValue={ null }
 								onChange={ event =>
-									this.setState({ ...this.state,
+									this.setState({
 										videoFile: (event.target.files.length === 1) ?
 											event.target.files[0] :
 											null
@@ -124,13 +124,13 @@ export class Options extends Component {
 							<label>
 								<input type="radio" name="video-choice"
 									checked={ this.state.videoChoice === VideoChoice.Url }
-									onChange={ () => this.setState({ ...this.state, videoChoice: VideoChoice.Url }) }
+									onChange={ () => this.setState({ videoChoice: VideoChoice.Url }) }
 								/> Direct video URL (webm / MP4)
 							</label>
 							<input type="url"
 								value={ this.state.videoUrl }
 								onChange={ event =>
-									this.setState({ ...this.state,
+									this.setState({
 										videoUrl: (event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
 											event.target.value :
 											null
@@ -142,7 +142,7 @@ export class Options extends Component {
 							<label>
 								<input type="radio" name="video-choice"
 									checked={ this.state.videoChoice === VideoChoice.Sample }
-									onChange={ () => this.setState({ ...this.state, videoChoice: VideoChoice.Sample }) }
+									onChange={ () => this.setState({ videoChoice: VideoChoice.Sample }) }
 								/> Sample video (75s long 1280x720, meant to be used with the default "Text" ASS option below)
 							</label>
 						</li>
@@ -151,7 +151,7 @@ export class Options extends Component {
 								<input type="radio" name="video-choice"
 									disabled={ !dummyVideoEnabled }
 									checked={ this.state.videoChoice === VideoChoice.Dummy }
-									onChange={ () => this.setState({ ...this.state, videoChoice: VideoChoice.Dummy }) }
+									onChange={ () => this.setState({ videoChoice: VideoChoice.Dummy }) }
 								/> Dummy video{
 									dummyVideoEnabled ?
 										"" :
@@ -161,7 +161,7 @@ export class Options extends Component {
 							<select
 								disabled={ !dummyVideoEnabled }
 								value={ this.state.videoDummyResolution.join("x") }
-								onChange={ event => this.setState({ ...this.state, videoDummyResolution: event.target.value.split("x") }) }
+								onChange={ event => this.setState({ videoDummyResolution: event.target.value.split("x") }) }
 							>
 								<option value="640x480">640 x 480 (SD fullscreen)</option>
 								<option value="704x480">704 x 480 (SD anamorphic)</option>
@@ -176,7 +176,7 @@ export class Options extends Component {
 							<input type="color"
 								disabled={ !dummyVideoEnabled }
 								value={ this.state.videoDummyColor }
-								onChange={ event => this.setState({ ...this.state, videoDummyColor: event.target.value }) }
+								onChange={ event => this.setState({ videoDummyColor: event.target.value }) }
 							/>
 							<label>
 								<input type="number"
@@ -184,10 +184,10 @@ export class Options extends Component {
 									value={ Math.floor(this.state.videoDummyDuration / 60) }
 									onChange={ event => {
 										try {
-											this.setState({ ...this.state, videoDummyDuration: parseInt(event.target.value) * 60 });
+											this.setState({ videoDummyDuration: parseInt(event.target.value) * 60 });
 										}
 										catch (ex) {
-											this.setState({ ...this.state, videoDummyDuration: null });
+											this.setState({ videoDummyDuration: null });
 										}
 									} }
 								/> mins
@@ -203,7 +203,7 @@ export class Options extends Component {
 								<input type="radio" name="ass-choice"
 									disabled={ !fileInputsEnabled }
 									checked={ this.state.assChoice === AssChoice.LocalFile }
-									onChange={ () => this.setState({ ...this.state, assChoice: AssChoice.LocalFile }) }
+									onChange={ () => this.setState({ assChoice: AssChoice.LocalFile }) }
 								/> Local file (The file won't be uploaded. It will be used directly within your browser.){
 									fileInputsEnabled ?
 										"" :
@@ -214,7 +214,7 @@ export class Options extends Component {
 								disabled={ !fileInputsEnabled }
 								defaultValue={ null }
 								onChange={ event =>
-									this.setState({ ...this.state,
+									this.setState({
 										assFile: (event.target.files.length === 1) ?
 											event.target.files[0] :
 											null
@@ -226,13 +226,13 @@ export class Options extends Component {
 							<label>
 								<input type="radio" name="ass-choice"
 									checked={ this.state.assChoice === AssChoice.Url }
-									onChange={ () => this.setState({ ...this.state, assChoice: AssChoice.Url }) }
+									onChange={ () => this.setState({ assChoice: AssChoice.Url }) }
 								/> Direct script URL (must be accessible via CORS)
 							</label>
 							<input type="url"
 								value={ this.state.assUrl }
 								onChange={ event =>
-									this.setState({ ...this.state,
+									this.setState({
 										assUrl: (event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
 											event.target.value :
 											null
@@ -244,13 +244,13 @@ export class Options extends Component {
 							<label>
 								<input type="radio" name="ass-choice"
 									checked={ this.state.assChoice === AssChoice.Text }
-									onChange={ () => this.setState({ ...this.state, assChoice: AssChoice.Text }) }
+									onChange={ () => this.setState({ assChoice: AssChoice.Text }) }
 								/> Text
 							</label>
 							<textarea
 								value={ this.state.assText }
 								onChange={ event =>
-									this.setState({ ...this.state,
+									this.setState({
 										assText: (event.target.value.length > 0) ?
 											event.target.value :
 											null

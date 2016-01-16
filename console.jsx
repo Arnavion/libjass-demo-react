@@ -95,6 +95,6 @@ export class Console extends Component {
 			}
 		}, `${ new Date().toString() }: `);
 
-		this.setState({ ...this.state, entries: [...this.state.entries, { type, text }] });
+		this.setState({ entries: [...this.state.entries, { type, text }] });
 	}
 }
