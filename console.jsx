@@ -95,6 +95,8 @@ export class Console extends Component {
 			}
 		}, `${ new Date().toString() }: `);
 
-		this.setState({ entries: [...this.state.entries, { type, text }] });
+		libjass.Promise.resolve().then(() =>
+			this.setState({ entries: [...this.state.entries, { type, text }] })
+		);
 	}
 }
