@@ -24,6 +24,8 @@ import libjass from "libjass";
 
 import defaultAssText from "raw!./default.ass";
 
+import { makeDummyVideo } from "./dummy-video";
+
 const VideoChoice = {
 	LocalFile: 0,
 	Url: 1,
