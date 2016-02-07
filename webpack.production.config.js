@@ -18,6 +18,7 @@
  * limitations under the License.
  */
 
+var path = require("path");
 var webpack = require("webpack");
 
 var config = require("./webpack.config");
@@ -29,5 +30,7 @@ config.plugins = [
 		}
 	})
 ];
+
+config.resolve.alias["libjass"] = path.resolve(require.resolve("libjass"), "..", "libjass.min.js");
 
 module.exports = config;
