@@ -36,6 +36,14 @@ module.exports = {
 					"react"
 				]
 			}
+		}, {
+			test: /\.css$/,
+			loader: "style-loader!css-loader"
 		}]
+	},
+	resolve: {
+		alias: {
+			"libjass.css": path.resolve(require.resolve("libjass"), "..", "libjass.css")
+		}
 	},
 };

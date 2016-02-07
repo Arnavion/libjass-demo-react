@@ -20,7 +20,7 @@
 
 import React, { Component, PropTypes } from "react";
 
-import libjass from "./libjass.js";
+import libjass from "libjass";
 
 export class Video extends Component {
 	constructor(props) {

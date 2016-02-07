@@ -20,9 +20,12 @@
 		"babel-preset-es2015": "6.x",
 		"babel-preset-react": "6.x",
 		"babel-runtime": "6.x",
+		"css-loader": "0.23.x",
+		"libjass": "0.11.0",
 		"raw-loader": "0.5.x",
 		"react": "0.14.x",
 		"react-dom": "0.14.x",
+		"style-loader": "0.13.x",
 		"webpack": "1.12.x"
 	},
 	"scripts": {

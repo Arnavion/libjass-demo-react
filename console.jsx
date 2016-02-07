@@ -20,7 +20,7 @@
 
 import React, { Component, PropTypes } from "react";
 
-import libjass from "./libjass";
+import libjass from "libjass";
 
 export class Console extends Component {
 	constructor(props) {

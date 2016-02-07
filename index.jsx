@@ -23,6 +23,9 @@ import "babel-polyfill";
 import React from "react";
 import { render } from "react-dom";
 
+import "./index.css";
+import "libjass.css";
+
 import { App } from "./app.jsx";
 
 addEventListener("DOMContentLoaded", () => render(<App />, document.querySelector("#root")));
