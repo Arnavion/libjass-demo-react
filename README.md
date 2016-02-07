@@ -2,6 +2,8 @@ A version of [libjass's](https://github.com/Arnavion/libjass) online [demo](http
 
 Install dependencies and build with `npm install`, then point a web server at this directory (such as `python3 -m http.server`) and load it in a browser.
 
+Rebuild with `npm run build`. Production build with `npm run build-prod`.
+
 
 ### License
 

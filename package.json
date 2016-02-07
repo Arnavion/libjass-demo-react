@@ -27,7 +27,7 @@
 	},
 	"scripts": {
 		"build": "webpack",
-		"dist": "webpack -p --config webpack.production.config.js",
+		"build-prod": "webpack -p --config webpack.production.config.js",
 		"install": "npm run build"
 	},
 	"private": true
