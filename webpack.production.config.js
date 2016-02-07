@@ -24,7 +24,9 @@ var config = require("./webpack.config");
 
 config.plugins = [
 	new webpack.DefinePlugin({
-		NODE_ENV: "production"
+		"process.env": {
+			NODE_ENV: '"production"'
+		}
 	})
 ];
 
