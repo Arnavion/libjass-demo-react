@@ -23,8 +23,8 @@ import React, { Component, PropTypes } from "react";
 import libjass from "libjass";
 
 export class Console extends Component {
-	constructor(props) {
-		super(props);
+	constructor(...args) {
+		super(...args);
 
 		this.state = {
 			entries: [],

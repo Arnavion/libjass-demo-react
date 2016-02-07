@@ -38,8 +38,8 @@ const AssChoice = {
 };
 
 export class Options extends Component {
-	constructor(props) {
-		super(props);
+	constructor(...args) {
+		super(...args);
 
 		this.state = {
 			videoChoice: VideoChoice.Sample,
