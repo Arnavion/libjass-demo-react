@@ -22,8 +22,8 @@ var path = require("path");
 var webpack = require("webpack");
 
 module.exports = {
-	entry: "./index.jsx",
-	output: { path: __dirname, filename: "index.js" },
+	entry: "./src/index.jsx",
+	output: { path: __dirname, filename: "./www/index.js" },
 	module: {
 		loaders: [{
 			test: /\.jsx?$/,
