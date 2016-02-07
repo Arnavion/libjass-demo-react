@@ -89,7 +89,7 @@ export function makeDummyVideo(video, width, height, color, duration) {
 
 				recorder.resume();
 			});
-		});
+		}, false);
 	}).then(([mediaSource, sourceBuffer, buffer]) =>
 		appendBufferUntil(sourceBuffer, buffer, duration).then(() => mediaSource.endOfStream()));
 }
@@ -130,7 +130,7 @@ function blobToArrayBuffer(blob) {
 		fileReader.addEventListener("load", () => {
 			resolve(fileReader.result);
 		}, false);
-		fileReader.addEventListener("error", reject);
+		fileReader.addEventListener("error", reject, false);
 
 		fileReader.readAsArrayBuffer(blob);
 	});
