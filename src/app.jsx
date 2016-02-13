@@ -80,5 +80,3 @@ export class App extends Component {
 		);
 	}
 }
-
-export { App };
