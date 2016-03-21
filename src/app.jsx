@@ -38,6 +38,7 @@ export class App extends Component {
 
 			videoPromiseFunc: null,
 			assPromise: null,
+			enableSvg: null,
 		};
 	}
 
@@ -51,7 +52,7 @@ export class App extends Component {
 						case Screens.Options:
 							return (
 								<Options
-									onSelected={ (videoPromiseFunc, assPromise) => this.setState({ currentScreen: Screens.Video, videoPromiseFunc, assPromise }) }
+									onSelected={ (videoPromiseFunc, assPromise, enableSvg) => this.setState({ currentScreen: Screens.Video, videoPromiseFunc, assPromise, enableSvg }) }
 								/>
 							);
 
@@ -60,6 +61,7 @@ export class App extends Component {
 								<Video
 									videoPromiseFunc={ this.state.videoPromiseFunc }
 									assPromise={ this.state.assPromise }
+									enableSvg = { this.state.enableSvg }
 								/>
 							);
 					}

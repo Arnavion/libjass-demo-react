@@ -18,16 +18,15 @@
  * limitations under the License.
  */
 
-import "babel-polyfill";
+// Needed to set correct xmlns on <svg> and to preserve attributes on feFunc*.
+// Required for 0.14.x. May become unnecessary with 15.x
 
-import "./react-fix-svg";
+import SVGDOMPropertyConfig from "react/lib/SVGDOMPropertyConfig";
 
-import React from "react";
-import { render } from "react-dom";
+import DOMProperty from "react/lib/DOMProperty";
+const MUST_USE_ATTRIBUTE = DOMProperty.injection.MUST_USE_ATTRIBUTE;
 
-import "./index.css";
-import "libjass.css";
-
-import { App } from "./app.jsx";
-
-addEventListener("DOMContentLoaded", () => render(<App />, document.querySelector("#root")));
+SVGDOMPropertyConfig.Properties.in = MUST_USE_ATTRIBUTE;
+SVGDOMPropertyConfig.Properties.intercept = MUST_USE_ATTRIBUTE;
+SVGDOMPropertyConfig.Properties.slope = MUST_USE_ATTRIBUTE;
+SVGDOMPropertyConfig.Properties.xmlns = MUST_USE_ATTRIBUTE;

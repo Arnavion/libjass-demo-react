@@ -56,6 +56,8 @@ export class Options extends Component {
 			assFile: null,
 			assUrl: null,
 			assText: defaultAssText,
+
+			enableSvg: null,
 		};
 	}
 
@@ -197,6 +199,7 @@ export class Options extends Component {
 						</li>
 					</ul>
 				</fieldset>
+
 				<fieldset>
 					<legend>Choose an ASS script</legend>
 					<ul className="choices-list">
@@ -262,6 +265,40 @@ export class Options extends Component {
 						</li>
 					</ul>
 				</fieldset>
+
+				<fieldset>
+					<legend>Other options</legend>
+					<ul>
+						<li>
+							Does the M at the end of this question appear red or black? <span style={ { color: "black", WebkitFilter: 'url("#redtext")', filter: 'url("#redtext")' } }>M</span>
+							<label>
+								<input type="radio" name="enable-svg"
+									checked={ this.state.enableSvg === true }
+									onChange={ () => this.setState({ enableSvg: true }) }
+								/> Red
+							</label>
+							<label>
+								<input type="radio" name="enable-svg"
+									checked={ this.state.enableSvg === false }
+									onChange={ () => this.setState({ enableSvg: false }) }
+								/> Black
+							</label>
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="0" height="0">
+								<defs>
+									<filter id="redtext" x="-50%" y="-50%" width="200%" height="200%">
+										<feComponentTransfer in="SourceAlpha">
+											<feFuncR type="linear" slope="0" intercept="1" />
+											<feFuncG type="linear" slope="0" intercept="0" />
+											<feFuncB type="linear" slope="0" intercept="0" />
+											<feFuncA type="linear" slope="1" intercept="0" />
+										</feComponentTransfer>
+									</filter>
+								</defs>
+							</svg>
+						</li>
+					</ul>
+				</fieldset>
+
 				<button type="button"
 					disabled={ !videoOk || !assOk }
 					onClick={ () => {
@@ -296,7 +333,7 @@ export class Options extends Component {
 								break;
 						}
 
-						this.props.onSelected(videoPromiseFunc, assPromise);
+						this.props.onSelected(videoPromiseFunc, assPromise, this.state.enableSvg);
 					} }
 				>Go</button>
 			</div>

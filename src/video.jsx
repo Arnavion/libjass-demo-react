@@ -132,9 +132,11 @@ export class Video extends Component {
 		});
 
 		libjass.Promise.all([videoPromise, assLoadedPromise]).then(([, ass]) => {
-			const renderer = new libjass.renderers.WebRenderer(ass, new libjass.renderers.VideoClock(video), this.refs.subsWrapper, {
-				enableSvg: (navigator.userAgent.indexOf("Trident") === -1) && (location.search.indexOf("disableSvg") === -1)
-			});
+			const rendererSettings = { };
+			if (this.props.enableSvg !== null) {
+				rendererSettings.enableSvg = this.props.enableSvg;
+			}
+			const renderer = new libjass.renderers.WebRenderer(ass, new libjass.renderers.VideoClock(video), this.refs.subsWrapper, rendererSettings);
 
 			window.renderer = renderer;
 
