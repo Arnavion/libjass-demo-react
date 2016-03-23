@@ -19,66 +19,70 @@
  */
 
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import { combineReducers } from "redux";
 
-import { Console } from "./console.jsx";
-import { Options } from "./options.jsx";
-import { Video } from "./video.jsx";
+import { Console, reducer as consoleReducer } from "./console.jsx";
+import { Actions, Options, reducer as optionsReducer } from "./options.jsx";
+import { Video, reducer as videoReducer } from "./video.jsx";
 
 const Screens = {
 	Options: 0,
 	Video: 1,
 };
 
-export class App extends Component {
-	constructor(...args) {
-		super(...args);
+export const App = connect(({ app }) => app)(({
+	currentScreen,
+	onSelected,
+}) => (
+	<div>
+		<p>This is a demo page for the libjass library - a library for displaying ASS subtitles on HTML5 video. See the source of index.js for an explanation of how to use the library.</p>
 
-		this.state = {
-			currentScreen: Screens.Options,
+		{ (() => {
+			switch (currentScreen) {
+				case Screens.Options:
+					return <Options />;
 
-			videoPromiseFunc: null,
-			assPromise: null,
-			enableSvg: null,
-		};
-	}
+				case Screens.Video:
+					return <Video />;
+			}
+		})() }
 
-	render() {
-		return (
-			<div>
-				<p>This is a demo page for the libjass library - a library for displaying ASS subtitles on HTML5 video. See the source of index.js for an explanation of how to use the library.</p>
+		<Console />
 
-				{ (() => {
-					switch (this.state.currentScreen) {
-						case Screens.Options:
-							return (
-								<Options
-									onSelected={ (videoPromiseFunc, assPromise, enableSvg) => this.setState({ currentScreen: Screens.Video, videoPromiseFunc, assPromise, enableSvg }) }
-								/>
-							);
+		<div>Found a bug? Please check if there's already a similar issue already reported at <a href="https://github.com/Arnavion/libjass/issues">https://github.com/Arnavion/libjass/issues</a> If there isn't, please open a new issue. You can also report it in the #libjass channel on the Rizon IRC network.</div>
+		<div>Please include the following information in your bug report:
+			<ul>
+				<li>Your OS and browser versions. Eg: "Chrome 49 on Windows 7"</li>
+				<li>A description of the bug. What did you expect to see? What happened instead? Eg: "All the subtitles are visible except the one at 00:00:05 'Was it you who broke the clock?'" or "The subtitle at 00:00:05 should be red but instead it's blue."</li>
+				<li>If possible, a URL to the video and script that I can access for testing.</li>
+				<li>Any text from the "Console output" section above.</li>
+			</ul>
+		</div>
+	</div>
+));
 
-						case Screens.Video:
-							return (
-								<Video
-									videoPromiseFunc={ this.state.videoPromiseFunc }
-									assPromise={ this.state.assPromise }
-									enableSvg = { this.state.enableSvg }
-								/>
-							);
-					}
-				})() }
+function appReducer(
+	state = {
+		currentScreen: Screens.Options,
+	},
+	action
+) {
+	switch (action.type) {
+		case Actions.OptionsSelected:
+			return {
+				...state,
+				currentScreen: Screens.Video,
+			};
 
-				<Console />
-
-				<div>Found a bug? Please check if there's already a similar issue already reported at <a href="https://github.com/Arnavion/libjass/issues">https://github.com/Arnavion/libjass/issues</a> If there isn't, please open a new issue. You can also report it in the #libjass channel on the Rizon IRC network.</div>
-				<div>Please include the following information in your bug report:
-					<ul>
-						<li>Your OS and browser versions. Eg: "Chrome 49 on Windows 7"</li>
-						<li>A description of the bug. What did you expect to see? What happened instead? Eg: "All the subtitles are visible except the one at 00:00:05 'Was it you who broke the clock?'" or "The subtitle at 00:00:05 should be red but instead it's blue."</li>
-						<li>If possible, a URL to the video and script that I can access for testing.</li>
-						<li>Any text from the "Console output" section above.</li>
-					</ul>
-				</div>
-			</div>
-		);
+		default:
+			return state;
 	}
 }
+
+export const reducer = combineReducers({
+	app: appReducer,
+	console: consoleReducer,
+	options: optionsReducer,
+	video: videoReducer,
+});

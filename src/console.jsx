@@ -18,20 +18,28 @@
  * limitations under the License.
  */
 
-import React, { Component, PropTypes } from "react";
-
 import libjass from "libjass";
+import React, { Component } from "react";
+import { connect } from "react-redux";
 
-export class Console extends Component {
-	constructor(...args) {
-		super(...args);
+function mapDispatchToProps(dispatch) {
+	return {
+		onAdd(type, text) {
+			dispatch({
+				type: Actions.ConsoleAdd,
+				payload: {
+					type,
+					text,
+				}
+			});
+		},
+	};
+}
 
-		this.state = {
-			entries: [],
-		};
-	}
-
+export const Console = connect(({ console }) => console, mapDispatchToProps)(class extends Component {
 	render() {
+		const { entries } = this.props;
+
 		return (
 			<fieldset className="console">
 				<legend>
@@ -56,7 +64,7 @@ export class Console extends Component {
 					</label>
 				</legend>
 				{
-					this.state.entries.map((entry, i) =>
+					entries.map((entry, i) =>
 						<div key={ i } className={ entry.type }>{ entry.text }</div>
 					)
 				}
@@ -71,19 +79,19 @@ export class Console extends Component {
 
 		console.log = (...items) => {
 			originalConsoleLog(...items);
-			this.add("log", items);
+			this._add("log", items);
 		};
 		console.warn = (...items) => {
 			originalConsoleWarn(...items);
-			this.add("warning", items);
+			this._add("warning", items);
 		};
 		console.error = (...items) => {
 			originalConsoleError(...items);
-			this.add("error", items);
+			this._add("error", items);
 		};
 	}
 
-	add(type, items) {
+	_add(type, items) {
 		const text = items.reduce((text, item) => {
 			switch (typeof item) {
 				case "boolean":
@@ -95,8 +103,31 @@ export class Console extends Component {
 			}
 		}, `${ new Date().toString() }: `);
 
-		libjass.Promise.resolve().then(() =>
-			this.setState({ entries: [...this.state.entries, { type, text }] })
-		);
+		libjass.Promise.resolve().then(() => this.props.onAdd(type, text));
+	}
+});
+
+const Actions = {
+	ConsoleAdd: 0,
+};
+
+export function reducer(
+	state = {
+		entries: [],
+	},
+	action
+) {
+	switch (action.type) {
+		case Actions.ConsoleAdd:
+			const { type, text } = action.payload;
+			return {
+				entries: [
+					...state.entries,
+					{ type, text }
+				]
+			};
+
+		default:
+			return state;
 	}
 }

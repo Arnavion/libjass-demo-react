@@ -18,38 +18,102 @@
  * limitations under the License.
  */
 
-import React, { Component, PropTypes } from "react";
-
 import libjass from "libjass";
+import React, { Component } from "react";
+import { connect } from "react-redux";
 
-export class Video extends Component {
-	constructor(...args) {
-		super(...args);
+function mapStateToProps({
+	options: {
+		videoPromiseFunc,
+		assPromise,
+		enableSvg
+	},
+	video
+}) {
+	return {
+		...video,
+		videoPromiseFunc,
+		assPromise,
+		enableSvg,
+	};
+}
 
-		this.state = {
-			videoResolution: null,
-			assResolution: null,
+function mapDispatchToProps(dispatch) {
+	return {
+		onChangeToVideoResolution() {
+			dispatch({
+				type: Actions.ChangeToVideoResolution,
+			});
+		},
 
-			subsEnabled: true,
+		onChangeToScriptResolution() {
+			dispatch({
+				type: Actions.ChangeToScriptResolution,
+			});
+		},
 
-			currentResolution: null,
+		onEnableDisableSubs(subsEnabled) {
+			dispatch({
+				type: Actions.EnableDisableSubs,
+				payload: {
+					subsEnabled,
+				},
+			});
+		},
 
-			renderer: null,
-		};
-	}
+		onVideoMetadataLoaded(videoResolution) {
+			dispatch({
+				type: Actions.VideoMetadataLoaded,
+				payload: {
+					videoResolution,
+				},
+			});
+		},
 
+		onScriptLoaded(assResolution) {
+			dispatch({
+				type: Actions.ScriptLoaded,
+				payload: {
+					assResolution,
+				},
+			});
+		},
+
+		onRendererCreated(renderer) {
+			dispatch({
+				type: Actions.RendererCreated,
+				payload: {
+					renderer,
+				},
+			});
+		},
+	};
+}
+
+export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends Component {
 	render() {
-		if (this.state.renderer !== null) {
-			this.state.renderer.setEnabled(this.state.subsEnabled);
-			this.state.renderer.resize(...this.state.currentResolution);
+		const {
+			videoResolution, assResolution,
+			subsEnabled,
+			currentResolution,
+			renderer,
+
+			onChangeToVideoResolution,
+			onChangeToScriptResolution,
+			onEnableDisableSubs,
+		} = this.props;
+
+		if (renderer !== null) {
+			renderer.setEnabled(subsEnabled);
+			renderer.resize(...currentResolution);
 		}
 
 		return (
 			<div>
 				<div ref="subsWrapper">
 					<video controls={ true } ref="video"
-						width={ (this.state.currentResolution !== null) ? this.state.currentResolution[0] : "" }
-						height={ (this.state.currentResolution !== null) ? this.state.currentResolution[1] : "" }
+						width={ (currentResolution !== null) ? currentResolution[0] : "" }
+						height={ (currentResolution !== null) ? currentResolution[1] : "" }
 					/>
 				</div>
 
@@ -60,31 +124,27 @@ export class Video extends Component {
 							<label>
 								<input type="radio" name="video-size"
 									defaultChecked={ true }
-									onChange={ () =>
-										this.setState({ currentResolution: [...this.state.videoResolution] })
-									}
+									onChange={ onChangeToVideoResolution }
 								/> Video resolution {
-									(this.state.videoResolution !== null) ?
-										this.state.videoResolution[0] :
+									(videoResolution !== null) ?
+										videoResolution[0] :
 										""
 								}x{
-									(this.state.videoResolution !== null) ?
-										this.state.videoResolution[1] :
+									(videoResolution !== null) ?
+										videoResolution[1] :
 										""
 								}
 							</label>
 							<label>
 								<input type="radio" name="video-size"
-									onChange={ () =>
-										this.setState({ currentResolution: [...this.state.assResolution] })
-									}
+									onChange={ onChangeToScriptResolution }
 								/> Script resolution {
-									(this.state.assResolution !== null) ?
-										this.state.assResolution[0] :
+									(assResolution !== null) ?
+										assResolution[0] :
 										""
 								}x{
-									(this.state.assResolution !== null) ?
-										this.state.assResolution[1] :
+									(assResolution !== null) ?
+										assResolution[1] :
 										""
 								}
 							</label>
@@ -93,8 +153,8 @@ export class Video extends Component {
 					<fieldset>
 						<legend>Subtitles</legend>
 						<label><input type="checkbox"
-							checked={ this.state.subsEnabled }
-							onChange={ event => this.setState({ subsEnabled: event.target.checked }) }
+							checked={ subsEnabled }
+							onChange={ event => onEnableDisableSubs(event.target.checked) }
 						/>Subtitles</label>
 					</fieldset>
 				</form>
@@ -103,14 +163,23 @@ export class Video extends Component {
 	}
 
 	componentDidMount() {
+		const {
+			videoPromiseFunc,
+			assPromise,
+			enableSvg,
+
+			onVideoMetadataLoaded,
+			onScriptLoaded,
+			onRendererCreated,
+		} = this.props;
+
 		const video = this.refs.video;
 
 		const videoPromise =
-			this.props.videoPromiseFunc(video).then(() => {
+			videoPromiseFunc(video).then(() => {
 				console.log("Video metadata loaded.");
 
-				const videoResolution = [video.videoWidth, video.videoHeight];
-				this.setState({ videoResolution, currentResolution: [...videoResolution] });
+				onVideoMetadataLoaded([video.videoWidth, video.videoHeight]);
 			}).catch(reason => {
 				const errorCode = (reason.code !== undefined) ? [null, "MEDIA_ERR_ABORTED", "MEDIA_ERR_NETWORK", "MEDIA_ERR_DECODE", "MEDIA_ERR_SRC_NOT_SUPPORTED"][reason.code] : "";
 				console.error("Video could not be loaded: %o %o", errorCode, reason);
@@ -118,12 +187,12 @@ export class Video extends Component {
 				throw reason;
 			});
 
-		const assLoadedPromise = this.props.assPromise.then(ass => {
+		const assLoadedPromise = assPromise.then(ass => {
 			console.log("Script received.");
 
 			window.ass = ass;
 
-			this.setState({ assResolution: [ass.properties.resolutionX, ass.properties.resolutionY] });
+			onScriptLoaded([ass.properties.resolutionX, ass.properties.resolutionY]);
 
 			return ass;
 		}).catch(reason => {
@@ -133,8 +202,8 @@ export class Video extends Component {
 
 		libjass.Promise.all([videoPromise, assLoadedPromise]).then(([, ass]) => {
 			const rendererSettings = { };
-			if (this.props.enableSvg !== null) {
-				rendererSettings.enableSvg = this.props.enableSvg;
+			if (enableSvg !== null) {
+				rendererSettings.enableSvg = enableSvg;
 			}
 			const renderer = new libjass.renderers.WebRenderer(ass, new libjass.renderers.VideoClock(video), this.refs.subsWrapper, rendererSettings);
 
@@ -146,14 +215,78 @@ export class Video extends Component {
 				video.play();
 			});
 
-			renderer.resize(...this.state.currentResolution);
+			renderer.resize(...this.props.currentResolution);
 
-			this.setState({ renderer });
+			onRendererCreated(renderer);
 		});
 	}
+});
+
+const Actions = {
+	ChangeToVideoResolution: 13,
+	ChangeToScriptResolution: 14,
+	EnableDisableSubs: 15,
+	VideoMetadataLoaded: 16,
+	ScriptLoaded: 17,
+	RendererCreated: 18,
 };
 
-Video.propTypes = {
-	videoPromiseFunc: PropTypes.func.isRequired,
-	assPromise: PropTypes.instanceOf(libjass.Promise).isRequired,
-};
+export function reducer(
+	state = {
+		videoResolution: null,
+		assResolution: null,
+
+		subsEnabled: true,
+
+		currentResolution: null,
+
+		renderer: null,
+	},
+	action
+) {
+	switch (action.type) {
+		case Actions.ChangeToVideoResolution:
+			return {
+				...state,
+				currentResolution: [...state.videoResolution],
+			};
+
+		case Actions.ChangeToScriptResolution:
+			return {
+				...state,
+				currentResolution: [...state.assResolution],
+			};
+
+		case Actions.EnableDisableSubs:
+			const { subsEnabled } = action.payload;
+			return {
+				...state,
+				subsEnabled
+			};
+
+		case Actions.VideoMetadataLoaded:
+			const { videoResolution } = action.payload;
+			return {
+				...state,
+				videoResolution,
+				currentResolution: [...videoResolution],
+			};
+
+		case Actions.ScriptLoaded:
+			const { assResolution } = action.payload;
+			return {
+				...state,
+				assResolution,
+			};
+
+		case Actions.RendererCreated:
+			const { renderer } = action.payload;
+			return {
+				...state,
+				renderer,
+			};
+
+		default:
+			return state;
+	}
+}

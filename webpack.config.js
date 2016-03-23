@@ -31,6 +31,11 @@ module.exports = {
 			exclude: /node_modules/,
 			query: {
 				compact: false,
+				plugins: [
+					"transform-class-properties",
+					"syntax-object-rest-spread",
+					"transform-object-rest-spread"
+				],
 				presets: [
 					"es2015",
 					"react"

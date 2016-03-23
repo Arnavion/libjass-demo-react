@@ -18,13 +18,127 @@
  * limitations under the License.
  */
 
-import React, { Component, PropTypes } from "react";
-
 import libjass from "libjass";
+import React, { Component } from "react";
+import { connect } from "react-redux";
 
 import defaultAssText from "raw!./default.ass";
 
 import { makeDummyVideo } from "./dummy-video";
+
+function mapDispatchToProps(dispatch) {
+	return {
+		onVideoChoiceChanged(videoChoice) {
+			dispatch({
+				type: Actions.VideoChoiceChanged,
+				payload: {
+					videoChoice
+				}
+			});
+		},
+
+		onVideoFileChanged(videoFile) {
+			dispatch({
+				type: Actions.VideoFileChanged,
+				payload: {
+					videoFile
+				}
+			});
+		},
+
+		onVideoUrlChanged(videoUrl) {
+			dispatch({
+				type: Actions.VideoUrlChanged,
+				payload: {
+					videoUrl
+				}
+			});
+		},
+
+		onVideoDummyResolutionChanged(videoDummyResolution) {
+			dispatch({
+				type: Actions.VideoDummyResolutionChanged,
+				payload: {
+					videoDummyResolution
+				}
+			});
+		},
+
+		onVideoDummyColorChanged(videoDummyColor) {
+			dispatch({
+				type: Actions.VideoDummyColorChanged,
+				payload: {
+					videoDummyColor
+				}
+			});
+		},
+
+		onVideoDummyDurationChanged(videoDummyDuration) {
+			dispatch({
+				type: Actions.VideoDummyDurationChanged,
+				payload: {
+					videoDummyDuration
+				}
+			});
+		},
+
+		onAssChoiceChanged(assChoice) {
+			dispatch({
+				type: Actions.AssChoiceChanged,
+				payload: {
+					assChoice
+				}
+			});
+		},
+
+		onAssFileChanged(assFile) {
+			dispatch({
+				type: Actions.AssFileChanged,
+				payload: {
+					assFile
+				}
+			});
+		},
+
+		onAssUrlChanged(assUrl) {
+			dispatch({
+				type: Actions.AssUrlChanged,
+				payload: {
+					assUrl
+				}
+			});
+		},
+
+		onAssTextChanged(assText) {
+			dispatch({
+				type: Actions.AssTextChanged,
+				payload: {
+					assText
+				}
+			});
+		},
+
+		onEnableDisableSvg(enableSvg) {
+			dispatch({
+				type: Actions.EnableDisableSvg,
+				payload: {
+					enableSvg
+				}
+			});
+		},
+
+		onSelected(videoPromiseFunc, assPromise, enableSvg) {
+			dispatch({
+				type: Actions.OptionsSelected,
+				payload: {
+					videoPromiseFunc,
+					assPromise,
+					enableSvg,
+				}
+			});
+		},
+	};
+}
 
 const VideoChoice = {
 	LocalFile: 0,
@@ -39,311 +153,452 @@ const AssChoice = {
 	Text: 2,
 };
 
-export class Options extends Component {
-	constructor(...args) {
-		super(...args);
+export const Options = connect(({ options }) => options, mapDispatchToProps)(({
+	videoChoice,
+	assChoice,
 
-		this.state = {
-			videoChoice: VideoChoice.Sample,
-			assChoice: AssChoice.Text,
+	videoFile,
+	videoUrl,
+	videoDummyResolution,
+	videoDummyColor,
+	videoDummyDuration,
 
-			videoFile: null,
-			videoUrl: null,
-			videoDummyResolution: [1280, 720],
-			videoDummyColor: "#2fa3fe",
-			videoDummyDuration: 25 * 60,
+	assFile,
+	assUrl,
+	assText,
 
-			assFile: null,
-			assUrl: null,
-			assText: defaultAssText,
+	enableSvg,
 
-			enableSvg: null,
-		};
-	}
+	videoPromiseFunc,
+	assPromise,
 
-	render() {
-		const fileInputsEnabled = (typeof URL !== "undefined" && typeof URL.createObjectURL === "function");
-		const dummyVideoEnabled = (
-			typeof HTMLCanvasElement.prototype.captureStream === "function" &&
-			typeof MediaRecorder !== "undefined" &&
-			typeof MediaSource !== "undefined" &&
-			typeof MediaSource.isTypeSupported === "function"/* &&
-			MediaSource.isTypeSupported("video/webm")*/
-		);
+	onVideoChoiceChanged,
+	onVideoFileChanged,
+	onVideoUrlChanged,
+	onVideoDummyResolutionChanged,
+	onVideoDummyColorChanged,
+	onVideoDummyDurationChanged,
 
-		const videoOk = (() => {
-			switch (this.state.videoChoice) {
-				case VideoChoice.LocalFile:
-					return this.state.videoFile !== null;
-				case VideoChoice.Url:
-					return this.state.videoUrl !== null;
-				case VideoChoice.Sample:
-					return true;
-				case VideoChoice.Dummy:
-					return (this.state.videoDummyResolution !== null) && (this.state.videoDummyColor !== null) && (this.state.videoDummyDuration !== null);
-			}
-		})();
+	onAssChoiceChanged,
+	onAssFileChanged,
+	onAssUrlChanged,
+	onAssTextChanged,
 
-		const assOk = (() => {
-			switch (this.state.assChoice) {
-				case AssChoice.LocalFile:
-					return this.state.assFile !== null;
-				case AssChoice.Url:
-					return this.state.assUrl !== null;
-				case AssChoice.Text:
-					return this.state.assText !== null;
-			}
-		})();
+	onEnableDisableSvg,
 
-		return (
-			<div>
-				<fieldset>
-					<legend>Choose a video</legend>
-					<ul className="choices-list">
-						<li>
-							<label>
-								<input type="radio" name="video-choice"
-									disabled={ !fileInputsEnabled }
-									checked={ this.state.videoChoice === VideoChoice.LocalFile }
-									onChange={ () => this.setState({ videoChoice: VideoChoice.LocalFile }) }
-								/> Local file (The file won't be uploaded. It will be used directly within your browser.){
-									fileInputsEnabled ?
-										"" :
-										" (This browser doesn't support URL.createObjectURL)"
-								}
-							</label>
-							<input type="file"
+	onSelected,
+}) => {
+	const fileInputsEnabled = (typeof URL !== "undefined" && typeof URL.createObjectURL === "function");
+	const dummyVideoEnabled = (
+		typeof HTMLCanvasElement.prototype.captureStream === "function" &&
+		typeof MediaRecorder !== "undefined" &&
+		typeof MediaSource !== "undefined" &&
+		typeof MediaSource.isTypeSupported === "function"/* &&
+		MediaSource.isTypeSupported("video/webm")*/
+	);
+
+	const videoOk = (() => {
+		switch (videoChoice) {
+			case VideoChoice.LocalFile:
+				return videoFile !== null;
+			case VideoChoice.Url:
+				return videoUrl !== null;
+			case VideoChoice.Sample:
+				return true;
+			case VideoChoice.Dummy:
+				return (videoDummyResolution !== null) && (videoDummyColor !== null) && (videoDummyDuration !== null);
+		}
+	})();
+
+	const assOk = (() => {
+		switch (assChoice) {
+			case AssChoice.LocalFile:
+				return assFile !== null;
+			case AssChoice.Url:
+				return assUrl !== null;
+			case AssChoice.Text:
+				return assText !== null;
+		}
+	})();
+
+	return (
+		<div>
+			<fieldset>
+				<legend>Choose a video</legend>
+				<ul className="choices-list">
+					<li>
+						<label>
+							<input type="radio" name="video-choice"
 								disabled={ !fileInputsEnabled }
-								defaultValue={ null }
-								onChange={ event =>
-									this.setState({
-										videoFile: (event.target.files.length === 1) ?
-											event.target.files[0] :
-											null
-									})
-								}
-							/>
-						</li>
-						<li>
-							<label>
-								<input type="radio" name="video-choice"
-									checked={ this.state.videoChoice === VideoChoice.Url }
-									onChange={ () => this.setState({ videoChoice: VideoChoice.Url }) }
-								/> Direct video URL (webm / MP4)
-							</label>
-							<input type="url"
-								value={ this.state.videoUrl }
-								onChange={ event =>
-									this.setState({
-										videoUrl: (event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
-											event.target.value :
-											null
-									})
-								}
-							/>
-						</li>
-						<li>
-							<label>
-								<input type="radio" name="video-choice"
-									checked={ this.state.videoChoice === VideoChoice.Sample }
-									onChange={ () => this.setState({ videoChoice: VideoChoice.Sample }) }
-								/> Sample video (75s long 1280x720, meant to be used with the default "Text" ASS option below)
-							</label>
-						</li>
-						<li>
-							<label>
-								<input type="radio" name="video-choice"
-									disabled={ !dummyVideoEnabled }
-									checked={ this.state.videoChoice === VideoChoice.Dummy }
-									onChange={ () => this.setState({ videoChoice: VideoChoice.Dummy }) }
-								/> Dummy video{
-									dummyVideoEnabled ?
-										"" :
-										" (This browser doesn't support generating dummy video. Consider using Firefox 46 or newer and enabling media.mediasource.webm.enabled in about:config)"
-								}
-							</label>
-							<select
+								checked={ videoChoice === VideoChoice.LocalFile }
+								onChange={ () => onVideoChoiceChanged(VideoChoice.LocalFile) }
+							/> Local file (The file won't be uploaded. It will be used directly within your browser.){
+								fileInputsEnabled ?
+									"" :
+									" (This browser doesn't support URL.createObjectURL)"
+							}
+						</label>
+						<input type="file"
+							disabled={ !fileInputsEnabled }
+							defaultValue={ null }
+							onChange={ event =>
+								onVideoFileChanged(
+									(event.target.files.length === 1) ?
+										event.target.files[0] :
+										null
+								)
+							}
+						/>
+					</li>
+					<li>
+						<label>
+							<input type="radio" name="video-choice"
+								checked={ videoChoice === VideoChoice.Url }
+								onChange={ () => onVideoChoiceChanged(VideoChoice.Url) }
+							/> Direct video URL (webm / MP4)
+						</label>
+						<input type="url"
+							value={ videoUrl }
+							onChange={ event =>
+								onVideoUrlChanged(
+									(event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
+										event.target.value :
+										null
+								)
+							}
+						/>
+					</li>
+					<li>
+						<label>
+							<input type="radio" name="video-choice"
+								checked={ videoChoice === VideoChoice.Sample }
+								onChange={ () => onVideoChoiceChanged(VideoChoice.Sample) }
+							/> Sample video (75s long 1280x720, meant to be used with the default "Text" ASS option below)
+						</label>
+					</li>
+					<li>
+						<label>
+							<input type="radio" name="video-choice"
 								disabled={ !dummyVideoEnabled }
-								value={ this.state.videoDummyResolution.join("x") }
-								onChange={ event => this.setState({ videoDummyResolution: event.target.value.split("x") }) }
-							>
-								<option value="640x480">640 x 480 (SD fullscreen)</option>
-								<option value="704x480">704 x 480 (SD anamorphic)</option>
-								<option value="640x360">640 x 360 (SD widescreen)</option>
-								<option value="704x396">704 x 396 (SD widescreen)</option>
-								<option value="640x352">640 x 352 (SD widescreen MOD16)</option>
-								<option value="704x400">704 x 400 (SD widescreen MOD16)</option>
-								<option value="1280x720">1280 x 720 (HD 720p)</option>
-								<option value="1920x1080">1920 x 1080 (HD 1080p)</option>
-								<option value="1024x576">1024 x 576 (SuperPAL widescreen)</option>
-							</select>
-							<input type="color"
+								checked={ videoChoice === VideoChoice.Dummy }
+								onChange={ () => onVideoChoiceChanged(VideoChoice.Dummy) }
+							/> Dummy video{
+								dummyVideoEnabled ?
+									"" :
+									" (This browser doesn't support generating dummy video. Consider using Firefox 46 or newer and enabling media.mediasource.webm.enabled in about:config)"
+							}
+						</label>
+						<select
+							disabled={ !dummyVideoEnabled }
+							value={ videoDummyResolution.join("x") }
+							onChange={ event => onVideoDummyResolutionChanged(event.target.value.split("x")) }
+						>
+							<option value="640x480">640 x 480 (SD fullscreen)</option>
+							<option value="704x480">704 x 480 (SD anamorphic)</option>
+							<option value="640x360">640 x 360 (SD widescreen)</option>
+							<option value="704x396">704 x 396 (SD widescreen)</option>
+							<option value="640x352">640 x 352 (SD widescreen MOD16)</option>
+							<option value="704x400">704 x 400 (SD widescreen MOD16)</option>
+							<option value="1280x720">1280 x 720 (HD 720p)</option>
+							<option value="1920x1080">1920 x 1080 (HD 1080p)</option>
+							<option value="1024x576">1024 x 576 (SuperPAL widescreen)</option>
+						</select>
+						<input type="color"
+							disabled={ !dummyVideoEnabled }
+							value={ videoDummyColor }
+							onChange={ event => onVideoDummyColorChanged(event.target.value) }
+						/>
+						<label>
+							<input type="number"
 								disabled={ !dummyVideoEnabled }
-								value={ this.state.videoDummyColor }
-								onChange={ event => this.setState({ videoDummyColor: event.target.value }) }
-							/>
-							<label>
-								<input type="number"
-									disabled={ !dummyVideoEnabled }
-									value={ Math.floor(this.state.videoDummyDuration / 60) }
-									onChange={ event => {
-										try {
-											this.setState({ videoDummyDuration: parseInt(event.target.value) * 60 });
-										}
-										catch (ex) {
-											this.setState({ videoDummyDuration: null });
-										}
-									} }
-								/> mins
-							</label>
-						</li>
-					</ul>
-				</fieldset>
+								value={ Math.floor(videoDummyDuration / 60) }
+								onChange={ event => {
+									try {
+										onVideoDummyDurationChanged(parseInt(event.target.value) * 60);
+									}
+									catch (ex) {
+										onVideoDummyDurationChanged(null);
+									}
+								} }
+							/> mins
+						</label>
+					</li>
+				</ul>
+			</fieldset>
 
-				<fieldset>
-					<legend>Choose an ASS script</legend>
-					<ul className="choices-list">
-						<li>
-							<label>
-								<input type="radio" name="ass-choice"
-									disabled={ !fileInputsEnabled }
-									checked={ this.state.assChoice === AssChoice.LocalFile }
-									onChange={ () => this.setState({ assChoice: AssChoice.LocalFile }) }
-								/> Local file (The file won't be uploaded. It will be used directly within your browser.){
-									fileInputsEnabled ?
-										"" :
-										" (This browser doesn't support URL.createObjectURL)"
-								}
-							</label>
-							<input type="file"
+			<fieldset>
+				<legend>Choose an ASS script</legend>
+				<ul className="choices-list">
+					<li>
+						<label>
+							<input type="radio" name="ass-choice"
 								disabled={ !fileInputsEnabled }
-								defaultValue={ null }
-								onChange={ event =>
-									this.setState({
-										assFile: (event.target.files.length === 1) ?
-											event.target.files[0] :
-											null
-									})
-								}
-							/>
-						</li>
-						<li>
-							<label>
-								<input type="radio" name="ass-choice"
-									checked={ this.state.assChoice === AssChoice.Url }
-									onChange={ () => this.setState({ assChoice: AssChoice.Url }) }
-								/> Direct script URL (must be accessible via CORS)
-							</label>
-							<input type="url"
-								value={ this.state.assUrl }
-								onChange={ event =>
-									this.setState({
-										assUrl: (event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
-											event.target.value :
-											null
-									})
-								}
-							/>
-						</li>
-						<li>
-							<label>
-								<input type="radio" name="ass-choice"
-									checked={ this.state.assChoice === AssChoice.Text }
-									onChange={ () => this.setState({ assChoice: AssChoice.Text }) }
-								/> Text
-							</label>
-							<textarea
-								value={ this.state.assText }
-								onChange={ event =>
-									this.setState({
-										assText: (event.target.value.length > 0) ?
-											event.target.value :
-											null
-									})
-								}
-							/>
-						</li>
-					</ul>
-				</fieldset>
+								checked={ assChoice === AssChoice.LocalFile }
+								onChange={ () => onAssChoiceChanged(AssChoice.LocalFile) }
+							/> Local file (The file won't be uploaded. It will be used directly within your browser.){
+								fileInputsEnabled ?
+									"" :
+									" (This browser doesn't support URL.createObjectURL)"
+							}
+						</label>
+						<input type="file"
+							disabled={ !fileInputsEnabled }
+							defaultValue={ null }
+							onChange={ event =>
+								onAssFileChanged(
+									(event.target.files.length === 1) ?
+										event.target.files[0] :
+										null
+								)
+							}
+						/>
+					</li>
+					<li>
+						<label>
+							<input type="radio" name="ass-choice"
+								checked={ assChoice === AssChoice.Url }
+								onChange={ () => onAssChoiceChanged(AssChoice.Url) }
+							/> Direct script URL (must be accessible via CORS)
+						</label>
+						<input type="url"
+							value={ assUrl }
+							onChange={ event =>
+								onAssUrlChanged(
+									(event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
+										event.target.value :
+										null
+								)
+							}
+						/>
+					</li>
+					<li>
+						<label>
+							<input type="radio" name="ass-choice"
+								checked={ assChoice === AssChoice.Text }
+								onChange={ () => onAssChoiceChanged(AssChoice.Text) }
+							/> Text
+						</label>
+						<textarea
+							value={ assText }
+							onChange={ event =>
+								onAssTexthanged(
+									(event.target.value.length > 0) ?
+										event.target.value :
+										null
+								)
+							}
+						/>
+					</li>
+				</ul>
+			</fieldset>
 
-				<fieldset>
-					<legend>Other options</legend>
-					<ul>
-						<li>
-							Does the M at the end of this question appear red or black? <span style={ { color: "black", WebkitFilter: 'url("#redtext")', filter: 'url("#redtext")' } }>M</span>
-							<label>
-								<input type="radio" name="enable-svg"
-									checked={ this.state.enableSvg === true }
-									onChange={ () => this.setState({ enableSvg: true }) }
-								/> Red
-							</label>
-							<label>
-								<input type="radio" name="enable-svg"
-									checked={ this.state.enableSvg === false }
-									onChange={ () => this.setState({ enableSvg: false }) }
-								/> Black
-							</label>
-							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="0" height="0">
-								<defs>
-									<filter id="redtext" x="-50%" y="-50%" width="200%" height="200%">
-										<feComponentTransfer in="SourceAlpha">
-											<feFuncR type="linear" slope="0" intercept="1" />
-											<feFuncG type="linear" slope="0" intercept="0" />
-											<feFuncB type="linear" slope="0" intercept="0" />
-											<feFuncA type="linear" slope="1" intercept="0" />
-										</feComponentTransfer>
-									</filter>
-								</defs>
-							</svg>
-						</li>
-					</ul>
-				</fieldset>
+			<fieldset>
+				<legend>Other options</legend>
+				<ul>
+					<li>
+						Does the M at the end of this question appear red or black? <span style={ { color: "black", WebkitFilter: 'url("#redtext")', filter: 'url("#redtext")' } }>M</span>
+						<label>
+							<input type="radio" name="enable-svg"
+								checked={ enableSvg === true }
+								onChange={ () => onEnableDisableSvg(true) }
+							/> Red
+						</label>
+						<label>
+							<input type="radio" name="enable-svg"
+								checked={ enableSvg === false }
+								onChange={ () => onEnableDisableSvg(false) }
+							/> Black
+						</label>
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="0" height="0">
+							<defs>
+								<filter id="redtext" x="-50%" y="-50%" width="200%" height="200%">
+									<feComponentTransfer in="SourceAlpha">
+										<feFuncR type="linear" slope="0" intercept="1" />
+										<feFuncG type="linear" slope="0" intercept="0" />
+										<feFuncB type="linear" slope="0" intercept="0" />
+										<feFuncA type="linear" slope="1" intercept="0" />
+									</feComponentTransfer>
+								</filter>
+							</defs>
+						</svg>
+					</li>
+				</ul>
+			</fieldset>
 
-				<button type="button"
-					disabled={ !videoOk || !assOk }
-					onClick={ () => {
-						let videoPromiseFunc = null;
+			<button type="button"
+				disabled={ !videoOk || !assOk }
+				onClick={ () => {
+					let videoPromiseFunc = null;
 
-						switch (this.state.videoChoice) {
-							case VideoChoice.LocalFile:
-								videoPromiseFunc = prepareVideo(this.state.videoChoice, URL.createObjectURL(this.state.videoFile));
-								break;
-							case VideoChoice.Url:
-								videoPromiseFunc = prepareVideo(this.state.videoChoice, this.state.videoUrl);
-								break;
-							case VideoChoice.Sample:
-								videoPromiseFunc = prepareVideo(this.state.videoChoice);
-								break;
-							case VideoChoice.Dummy:
-								videoPromiseFunc = prepareVideo(this.state.videoChoice, this.state.videoDummyResolution, this.state.videoDummyColor, this.state.videoDummyDuration);
-								break;
-						}
+					switch (videoChoice) {
+						case VideoChoice.LocalFile:
+							videoPromiseFunc = prepareVideo(videoChoice, URL.createObjectURL(videoFile));
+							break;
+						case VideoChoice.Url:
+							videoPromiseFunc = prepareVideo(videoChoice, videoUrl);
+							break;
+						case VideoChoice.Sample:
+							videoPromiseFunc = prepareVideo(videoChoice);
+							break;
+						case VideoChoice.Dummy:
+							videoPromiseFunc = prepareVideo(videoChoice, videoDummyResolution, videoDummyColor, videoDummyDuration);
+							break;
+					}
 
-						let assPromise = null;
+					let assPromise = null;
 
-						switch (this.state.assChoice) {
-							case AssChoice.LocalFile:
-								assPromise = libjass.ASS.fromUrl(URL.createObjectURL(this.state.assFile));
-								break;
-							case AssChoice.Url:
-								assPromise = libjass.ASS.fromUrl(this.state.assUrl);
-								break;
-							case AssChoice.Text:
-								assPromise = libjass.ASS.fromString(this.state.assText);
-								break;
-						}
+					switch (assChoice) {
+						case AssChoice.LocalFile:
+							assPromise = libjass.ASS.fromUrl(URL.createObjectURL(assFile));
+							break;
+						case AssChoice.Url:
+							assPromise = libjass.ASS.fromUrl(assUrl);
+							break;
+						case AssChoice.Text:
+							assPromise = libjass.ASS.fromString(assText);
+							break;
+					}
 
-						this.props.onSelected(videoPromiseFunc, assPromise, this.state.enableSvg);
-					} }
-				>Go</button>
-			</div>
-		);
-	}
+					onSelected(videoPromiseFunc, assPromise, enableSvg);
+				} }
+			>Go</button>
+		</div>
+	);
+});
+
+export const Actions = {
+	VideoChoiceChanged: 1,
+	VideoFileChanged: 2,
+	VideoUrlChanged: 3,
+	VideoDummyResolutionChanged: 4,
+	VideoDummyColorChanged: 5,
+	VideoDummyDurationChanged: 6,
+
+	AssChoiceChanged: 7,
+	AssFileChanged: 8,
+	AssUrlChanged: 9,
+	AssTextChanged: 10,
+
+	EnableDisableSvg: 11,
+
+	OptionsSelected: 12,
 };
 
-Options.propTypes = {
-	onSelected: PropTypes.func.isRequired
-};
+export function reducer(
+	state = {
+		videoChoice: VideoChoice.Sample,
+		assChoice: AssChoice.Text,
+
+		videoFile: null,
+		videoUrl: null,
+		videoDummyResolution: [1280, 720],
+		videoDummyColor: "#2fa3fe",
+		videoDummyDuration: 25 * 60,
+
+		assFile: null,
+		assUrl: null,
+		assText: defaultAssText,
+
+		enableSvg: null,
+
+		videoPromiseFunc: null,
+		assPromise: null,
+	},
+	action
+) {
+	switch (action.type) {
+		case Actions.OptionsSelected: {
+				const { videoPromiseFunc, assPromise, enableSvg } = action.payload;
+				return {
+					...state,
+					videoPromiseFunc,
+					assPromise,
+					enableSvg,
+				}
+			}
+
+		case Actions.VideoChoiceChanged:
+			const { videoChoice } = action.payload;
+			return {
+				...state,
+				videoChoice,
+			}
+
+		case Actions.VideoFileChanged:
+			const { videoFile } = action.payload;
+			return {
+				...state,
+				videoFile,
+			}
+
+		case Actions.VideoUrlChanged:
+			const { videoUrl } = action.payload;
+			return {
+				...state,
+				videoUrl,
+			}
+
+		case Actions.VideoDummyResolutionChanged:
+			const { videoDummyResolution } = action.payload;
+			return {
+				...state,
+				videoDummyResolution,
+			}
+
+		case Actions.VideoDummyColorChanged:
+			const { videoDummyColor } = action.payload;
+			return {
+				...state,
+				videoDummyColor,
+			}
+
+		case Actions.VideoDummyDurationChanged:
+			const { videoDummyDuration } = action.payload;
+			return {
+				...state,
+				videoDummyDuration,
+			}
+
+		case Actions.AssChoiceChanged:
+			const { assChoice } = action.payload;
+			return {
+				...state,
+				assChoice,
+			}
+
+		case Actions.AssFileChanged:
+			const { assFile } = action.payload;
+			return {
+				...state,
+				assFile,
+			}
+
+		case Actions.AssUrlChanged:
+			const { assUrl } = action.payload;
+			return {
+				...state,
+				assUrl,
+			}
+
+		case Actions.AssTextChanged:
+			const { assText } = action.payload;
+			return {
+				...state,
+				assText,
+			}
+
+		case Actions.EnableDisableSvg: {
+				const { enableSvg } = action.payload;
+				return {
+					...state,
+					enableSvg,
+				}
+			}
+
+		default:
+			return state;
+	}
+}
 
 function prepareVideo(videoChoice, ...parameters) {
 	return video => {
