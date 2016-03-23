@@ -4,10 +4,6 @@ body {
 	box-sizing: border-box;
 }
 
-.libjass-subs {
-	z-index: 2147483647;
-}
-
 .settings-form > fieldset {
 	display: inline-block;
 }
