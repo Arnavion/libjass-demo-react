@@ -33,7 +33,6 @@ const Screens = {
 
 export const App = connect(({ app }) => app)(({
 	currentScreen,
-	onSelected,
 }) => (
 	<div>
 		<p>This is a demo page for the libjass library - a library for displaying ASS subtitles on HTML5 video. See the source of index.js for an explanation of how to use the library.</p>
