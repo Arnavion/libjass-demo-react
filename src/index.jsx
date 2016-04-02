@@ -18,10 +18,6 @@
  * limitations under the License.
  */
 
-import "babel-polyfill";
-
-import "./react-fix-svg";
-
 import React from "react";
 import { render } from "react-dom";
 import { Provider } from "react-redux";

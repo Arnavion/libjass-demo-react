@@ -14,6 +14,7 @@
 		"url": "https://github.com/Arnavion/libjass"
 	},
 	"dependencies": {
+		"babel-cli": "6.x",
 		"babel-core": "6.x",
 		"babel-loader": "6.x",
 		"babel-plugin-syntax-object-rest-spread": "6.x",
@@ -25,16 +26,14 @@
 		"css-loader": "0.23.x",
 		"libjass": "0.11.0",
 		"raw-loader": "0.5.x",
-		"react": "0.14.x",
-		"react-dom": "0.14.x",
-		"react-redux": "4.x",
-		"redux": "3.x",
+		"request": "2.x",
+		"semver": "5.x",
 		"style-loader": "0.13.x",
 		"webpack": "1.12.x"
 	},
 	"scripts": {
-		"build": "webpack",
-		"build-prod": "webpack -p --config webpack.production.config.js",
+		"build": "webpack && babel-node --presets es2015 ./src/index.xhtml.js",
+		"build-prod": "webpack -p --config webpack.production.config.js && babel-node --presets es2015 ./src/index.xhtml.js",
 		"install": "npm run build"
 	},
 	"private": true

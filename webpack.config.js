@@ -46,6 +46,12 @@ module.exports = {
 			loader: "style-loader!css-loader"
 		}]
 	},
+	externals: {
+		"react": "React",
+		"react-dom": "ReactDOM",
+		"react-redux": "ReactRedux",
+		"redux": "Redux"
+	},
 	resolve: {
 		alias: {
 			"libjass.css": path.resolve(require.resolve("libjass"), "..", "libjass.css")
