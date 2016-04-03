@@ -169,9 +169,6 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 
 	enableSvg,
 
-	videoPromiseFunc,
-	assPromise,
-
 	onVideoChoiceChanged,
 	onVideoFileChanged,
 	onVideoUrlChanged,
@@ -381,7 +378,7 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 						<textarea
 							value={ assText }
 							onChange={ event =>
-								onAssTexthanged(
+								onAssTextChanged(
 									(event.target.value.length > 0) ?
 										event.target.value :
 										null
