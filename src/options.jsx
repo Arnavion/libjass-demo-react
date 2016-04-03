@@ -631,7 +631,7 @@ function prepareVideo(videoChoice, ...parameters) {
 				throw new Error(`Unrecognized videoChoice ${ videoChoice }`);
 		}
 
-		return new libjass.Promise((resolve, reject) => {
+		return new Promise((resolve, reject) => {
 			if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
 				// Video metadata isn't available yet. Register an event handler for it.
 				video.addEventListener("loadedmetadata", resolve, false);

@@ -200,7 +200,7 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 			throw reason;
 		});
 
-		libjass.Promise.all([videoPromise, assLoadedPromise]).then(([, ass]) => {
+		Promise.all([videoPromise, assLoadedPromise]).then(([, ass]) => {
 			const rendererSettings = { };
 			if (enableSvg !== null) {
 				rendererSettings.enableSvg = enableSvg;

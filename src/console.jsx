@@ -103,7 +103,7 @@ export const Console = connect(({ console }) => console, mapDispatchToProps)(cla
 			}
 		}, `${ new Date().toString() }: `);
 
-		libjass.Promise.resolve().then(() => this.props.onAdd(type, text));
+		Promise.resolve().then(() => this.props.onAdd(type, text));
 	}
 });
 

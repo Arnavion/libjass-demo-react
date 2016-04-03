@@ -18,13 +18,11 @@
  * limitations under the License.
  */
 
-import libjass from "libjass";
-
 /**
  * Creates a video of the given color, dimensions and duration, and prepares the given video element to play it.
  */
 export function makeDummyVideo(video, width, height, color, duration) {
-	return new libjass.Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		video.width = width;
 		video.height = height;
 
@@ -73,7 +71,7 @@ export function makeDummyVideo(video, width, height, color, duration) {
 			}
 
 			// Data is available but may not contain any frames. Test for that.
-			libjass.Promise.all([newMediaSourceAndBuffer(video, blob.type), blobToArrayBuffer(blob)]).then(([[mediaSource, sourceBuffer], buffer]) =>
+			Promise.all([newMediaSourceAndBuffer(video, blob.type), blobToArrayBuffer(blob)]).then(([[mediaSource, sourceBuffer], buffer]) =>
 				appendBuffer(sourceBuffer, buffer).then(() => {
 					console.log(`Got enough data for ${ getEndTime(sourceBuffer) } seconds.`);
 
@@ -98,7 +96,7 @@ export function makeDummyVideo(video, width, height, color, duration) {
  * Sets up the given `video` to use a new MediaSource, and appends a new SourceBuffer of the given `type`.
  */
 function newMediaSourceAndBuffer(video, type) {
-	return new libjass.Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const mediaSource = new MediaSource();
 
 		function onSourceOpen() {
@@ -124,7 +122,7 @@ function newMediaSourceAndBuffer(video, type) {
  * Converts a Blob to an ArrayBuffer
  */
 function blobToArrayBuffer(blob) {
-	return new libjass.Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const fileReader = new FileReader();
 
 		fileReader.addEventListener("load", () => {
@@ -140,7 +138,7 @@ function blobToArrayBuffer(blob) {
  * Appends the given video data `buffer` to the given `sourceBuffer`.
  */
 function appendBuffer(sourceBuffer, buffer) {
-	return new libjass.Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const currentEndTime = getEndTime(sourceBuffer);
 
 		function onUpdateEnd() {
@@ -176,7 +174,7 @@ function appendBufferUntil(sourceBuffer, buffer, duration) {
 		return appendBuffer(sourceBuffer, buffer).then(() => appendBufferUntil(sourceBuffer, buffer, duration));
 	}
 	else {
-		return libjass.Promise.resolve();
+		return Promise.resolve();
 	}
 }
 
