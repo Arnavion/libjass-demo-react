@@ -30,7 +30,6 @@ for (const [name, requiredVersion] of [
 	["react-redux", "4.x"],
 	["redux", "3.x"]
 ]) {
-	// https://api.cdnjs.com/libraries/react-redux
 	promises.push(new Promise((resolve, reject) =>
 		request(`https://api.cdnjs.com/libraries/${ name }`, (err, response, body) => {
 			if (err) {
@@ -57,7 +56,7 @@ for (const [name, requiredVersion] of [
 		}));
 }
 
-Promise.all(promises).then(([babel, react, reactRedux, redux]) => {
+Promise.all(promises).then(([babel, react, reactRedux, redux]) => new Promise((resolve, reject) => {
 	const xhtml =
 `<?xml version="1.0" encoding="utf-8" ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
@@ -78,10 +77,12 @@ Promise.all(promises).then(([babel, react, reactRedux, redux]) => {
 
 	writeFile("./www/index.xhtml", xhtml, "utf-8", err => {
 		if (err) {
-			throw err;
+			reject(err);
+			return;
 		}
+		resolve();
 	});
-}).catch(reason => {
+})).catch(reason => {
 	console.error(reason);
 	process.exit(1);
 });
