@@ -125,6 +125,8 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 			onChangeToVideoResolution,
 			onChangeToScriptResolution,
 			onEnableDisableSubs,
+
+			videoChoice,
 		} = this.props;
 
 		if (renderer !== null) {
@@ -138,7 +140,13 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 					<video controls={ true } ref="video"
 						width={ (currentResolution !== null) ? currentResolution[0] : "" }
 						height={ (currentResolution !== null) ? currentResolution[1] : "" }
-					/>
+					>{
+						(videoChoice === VideoChoice.Sample) ? [
+								<source key={ 0 } type="video/webm" src="sample.webm" />,
+								<source key={ 1 } type="video/mp4" src="sample.mp4" />
+							] :
+							[]
+					}</video>
 				</div>
 
 				<form className="settings-form">
@@ -223,16 +231,6 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 				break;
 
 			case VideoChoice.Sample:
-				const webmSource = document.createElement("source");
-				video.appendChild(webmSource);
-				webmSource.type = "video/webm";
-				webmSource.src = "sample.webm";
-
-				const mp4Source = document.createElement("source");
-				video.appendChild(mp4Source);
-				mp4Source.type = "video/mp4";
-				mp4Source.src = "sample.mp4";
-
 				videoPromise = metadataLoaded(video);
 				break;
 
