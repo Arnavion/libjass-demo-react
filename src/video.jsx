@@ -296,8 +296,6 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 				video.play();
 			});
 
-			renderer.resize(...this.props.currentResolution);
-
 			onRendererCreated(renderer);
 		});
 	}
