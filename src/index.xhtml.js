@@ -28,7 +28,7 @@ const promises = [];
 
 for (const [name, requiredVersion] of [
 	["babel-polyfill", "6.x"],
-	["react", "15.0.0-rc.2"],
+	["react", "15.x"],
 	["react-redux", "4.x"],
 	["redux", "3.x"]
 ]) {
