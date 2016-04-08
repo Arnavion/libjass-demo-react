@@ -24,8 +24,6 @@ import { connect } from "react-redux";
 
 import defaultAssText from "raw!./default.ass";
 
-import { makeDummyVideo } from "./dummy-video";
-
 function mapDispatchToProps(dispatch) {
 	return {
 		onVideoChoiceChanged(videoChoice) {
@@ -127,12 +125,36 @@ function mapDispatchToProps(dispatch) {
 			});
 		},
 
-		onSelected(videoPromiseFunc, assPromise, enableSvg) {
+		onSelected(
+			videoChoice,
+			videoFile,
+			videoUrl,
+			videoDummyResolution,
+			videoDummyColor,
+			videoDummyDuration,
+
+			assChoice,
+			assFile,
+			assUrl,
+			assText,
+
+			enableSvg
+		) {
 			dispatch({
 				type: Actions.OptionsSelected,
 				payload: {
-					videoPromiseFunc,
-					assPromise,
+					videoChoice,
+					videoFile,
+					videoUrl,
+					videoDummyResolution,
+					videoDummyColor,
+					videoDummyDuration,
+
+					assChoice,
+					assFile,
+					assUrl,
+					assText,
+
 					enableSvg,
 				}
 			});
@@ -140,14 +162,14 @@ function mapDispatchToProps(dispatch) {
 	};
 }
 
-const VideoChoice = {
+export const VideoChoice = {
 	LocalFile: 0,
 	Url: 1,
 	Sample: 2,
 	Dummy: 3,
 };
 
-const AssChoice = {
+export const AssChoice = {
 	LocalFile: 0,
 	Url: 1,
 	Text: 2,
@@ -425,38 +447,21 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 			<button type="button"
 				disabled={ !videoOk || !assOk }
 				onClick={ () => {
-					let videoPromiseFunc = null;
+					onSelected(
+						videoChoice,
+						videoFile,
+						videoUrl,
+						videoDummyResolution,
+						videoDummyColor,
+						videoDummyDuration,
 
-					switch (videoChoice) {
-						case VideoChoice.LocalFile:
-							videoPromiseFunc = prepareVideo(videoChoice, URL.createObjectURL(videoFile));
-							break;
-						case VideoChoice.Url:
-							videoPromiseFunc = prepareVideo(videoChoice, videoUrl);
-							break;
-						case VideoChoice.Sample:
-							videoPromiseFunc = prepareVideo(videoChoice);
-							break;
-						case VideoChoice.Dummy:
-							videoPromiseFunc = prepareVideo(videoChoice, videoDummyResolution, videoDummyColor, videoDummyDuration);
-							break;
-					}
+						assChoice,
+						assFile,
+						assUrl,
+						assText,
 
-					let assPromise = null;
-
-					switch (assChoice) {
-						case AssChoice.LocalFile:
-							assPromise = libjass.ASS.fromUrl(URL.createObjectURL(assFile));
-							break;
-						case AssChoice.Url:
-							assPromise = libjass.ASS.fromUrl(assUrl);
-							break;
-						case AssChoice.Text:
-							assPromise = libjass.ASS.fromString(assText);
-							break;
-					}
-
-					onSelected(videoPromiseFunc, assPromise, enableSvg);
+						enableSvg
+					);
 				} }
 			>Go</button>
 		</div>
@@ -484,35 +489,57 @@ export const Actions = {
 export function reducer(
 	state = {
 		videoChoice: VideoChoice.Sample,
-		assChoice: AssChoice.Text,
-
 		videoFile: null,
 		videoUrl: null,
 		videoDummyResolution: [1280, 720],
 		videoDummyColor: "#2fa3fe",
 		videoDummyDuration: 25 * 60,
 
+		assChoice: AssChoice.Text,
 		assFile: null,
 		assUrl: null,
 		assText: defaultAssText,
 
 		enableSvg: null,
-
-		videoPromiseFunc: null,
-		assPromise: null,
 	},
 	action
 ) {
 	switch (action.type) {
 		case Actions.OptionsSelected: {
-				const { videoPromiseFunc, assPromise, enableSvg } = action.payload;
-				return {
-					...state,
-					videoPromiseFunc,
-					assPromise,
-					enableSvg,
-				}
+			const {
+				videoChoice,
+				videoFile,
+				videoUrl,
+				videoDummyResolution,
+				videoDummyColor,
+				videoDummyDuration,
+
+				assChoice,
+				assFile,
+				assUrl,
+				assText,
+
+				enableSvg,
+			} = action.payload;
+
+			return {
+				...state,
+
+				videoChoice,
+				videoFile,
+				videoUrl,
+				videoDummyResolution,
+				videoDummyColor,
+				videoDummyDuration,
+
+				assChoice,
+				assFile,
+				assUrl,
+				assText,
+
+				enableSvg,
 			}
+		}
 
 		case Actions.VideoChoiceChanged:
 			const { videoChoice } = action.payload;
@@ -585,62 +612,14 @@ export function reducer(
 			}
 
 		case Actions.EnableDisableSvg: {
-				const { enableSvg } = action.payload;
-				return {
-					...state,
-					enableSvg,
-				}
+			const { enableSvg } = action.payload;
+			return {
+				...state,
+				enableSvg,
 			}
+		}
 
 		default:
 			return state;
 	}
-}
-
-function prepareVideo(videoChoice, ...parameters) {
-	return video => {
-		switch (videoChoice) {
-			case VideoChoice.Dummy:
-				const [[width, height], color, duration] = parameters;
-				return makeDummyVideo(video, width, height, color, duration);
-
-			case VideoChoice.LocalFile:
-			case VideoChoice.Url:
-				const [videoUrl] = parameters;
-
-				/* Set the <video> element's src to the given URL
-				 */
-				video.src = videoUrl;
-				break;
-
-			case VideoChoice.Sample:
-				/* Add <source> elements for the two sample videos.
-				 */
-				const webmSource = document.createElement("source");
-				video.appendChild(webmSource);
-				webmSource.type = "video/webm";
-				webmSource.src = "sample.webm";
-
-				const mp4Source = document.createElement("source");
-				video.appendChild(mp4Source);
-				mp4Source.type = "video/mp4";
-				mp4Source.src = "sample.mp4";
-				break;
-
-			default:
-				throw new Error(`Unrecognized videoChoice ${ videoChoice }`);
-		}
-
-		return new Promise((resolve, reject) => {
-			if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
-				// Video metadata isn't available yet. Register an event handler for it.
-				video.addEventListener("loadedmetadata", resolve, false);
-				video.addEventListener("error", () => reject(video.error), false);
-			}
-			else {
-				// Video metadata is already available.
-				resolve();
-			}
-		});
-	};
 }

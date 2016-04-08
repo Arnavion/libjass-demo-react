@@ -22,18 +22,42 @@ import libjass from "libjass";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
+import { makeDummyVideo } from "./dummy-video";
+import { VideoChoice, AssChoice } from "./options.jsx";
+
 function mapStateToProps({
 	options: {
-		videoPromiseFunc,
-		assPromise,
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
+
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
+
 		enableSvg
 	},
 	video
 }) {
 	return {
 		...video,
-		videoPromiseFunc,
-		assPromise,
+
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
+
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
+
 		enableSvg,
 	};
 }
@@ -164,8 +188,18 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 
 	componentDidMount() {
 		const {
-			videoPromiseFunc,
-			assPromise,
+			videoChoice,
+			videoFile,
+			videoUrl,
+			videoDummyResolution,
+			videoDummyColor,
+			videoDummyDuration,
+
+			assChoice,
+			assFile,
+			assUrl,
+			assText,
+
 			enableSvg,
 
 			onVideoMetadataLoaded,
@@ -173,10 +207,43 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 			onRendererCreated,
 		} = this.props;
 
-		const video = this.refs.video;
+		const { video } = this.refs;
 
-		const videoPromise =
-			videoPromiseFunc(video).then(() => {
+		let videoPromise = null;
+
+		switch (videoChoice) {
+			case VideoChoice.LocalFile:
+				video.src = URL.createObjectURL(videoFile);
+				videoPromise = metadataLoaded(video);
+				break;
+
+			case VideoChoice.Url:
+				video.src = videoUrl;
+				videoPromise = metadataLoaded(video);
+				break;
+
+			case VideoChoice.Sample:
+				const webmSource = document.createElement("source");
+				video.appendChild(webmSource);
+				webmSource.type = "video/webm";
+				webmSource.src = "sample.webm";
+
+				const mp4Source = document.createElement("source");
+				video.appendChild(mp4Source);
+				mp4Source.type = "video/mp4";
+				mp4Source.src = "sample.mp4";
+
+				videoPromise = metadataLoaded(video);
+				break;
+
+			case VideoChoice.Dummy:
+				const [dummyVideoWidth, dummyVideoHeight] = videoDummyResolution;
+				videoPromise = makeDummyVideo(video, dummyVideoWidth, dummyVideoHeight, videoDummyColor, videoDummyDuration);
+				break;
+		}
+
+		videoPromise =
+			videoPromise.then(() => {
 				console.log("Video metadata loaded.");
 
 				onVideoMetadataLoaded([video.videoWidth, video.videoHeight]);
@@ -187,7 +254,21 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 				throw reason;
 			});
 
-		const assLoadedPromise = assPromise.then(ass => {
+		let assPromise = null;
+
+		switch (assChoice) {
+			case AssChoice.LocalFile:
+				assPromise = libjass.ASS.fromUrl(URL.createObjectURL(assFile));
+				break;
+			case AssChoice.Url:
+				assPromise = libjass.ASS.fromUrl(assUrl);
+				break;
+			case AssChoice.Text:
+				assPromise = libjass.ASS.fromString(assText);
+				break;
+		}
+
+		assPromise = assPromise.then(ass => {
 			console.log("Script received.");
 
 			window.ass = ass;
@@ -200,7 +281,7 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 			throw reason;
 		});
 
-		Promise.all([videoPromise, assLoadedPromise]).then(([, ass]) => {
+		Promise.all([videoPromise, assPromise]).then(([, ass]) => {
 			const rendererSettings = { };
 			if (enableSvg !== null) {
 				rendererSettings.enableSvg = enableSvg;
@@ -289,4 +370,18 @@ export function reducer(
 		default:
 			return state;
 	}
+}
+
+function metadataLoaded(video) {
+	return new Promise((resolve, reject) => {
+		if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+			// Video metadata isn't available yet. Register an event handler for it.
+			video.addEventListener("loadedmetadata", resolve, false);
+			video.addEventListener("error", () => reject(video.error), false);
+		}
+		else {
+			// Video metadata is already available.
+			resolve();
+		}
+	});
 }
