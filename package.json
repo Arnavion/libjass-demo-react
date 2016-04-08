@@ -32,7 +32,7 @@
 	},
 	"scripts": {
 		"build": "webpack && babel-node --presets es2015 ./src/index.xhtml.js",
-		"build-prod": "webpack -p --config webpack.production.config.js && babel-node --presets es2015 ./src/index.xhtml.js",
+		"build-prod": "webpack -p --config webpack.production.config.js && babel-node --presets es2015 ./src/index.xhtml.js prod",
 		"install": "npm run build"
 	},
 	"private": true
