@@ -277,7 +277,7 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 							/> Direct video URL (webm / MP4)
 						</label>
 						<input type="url"
-							value={ videoUrl }
+							value={ (videoUrl === null) ? "" : videoUrl }
 							onChange={ event =>
 								onVideoUrlChanged(
 									(event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
@@ -380,7 +380,7 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 							/> Direct script URL (must be accessible via CORS)
 						</label>
 						<input type="url"
-							value={ assUrl }
+							value={ (assUrl === null) ? "" : assUrl }
 							onChange={ event =>
 								onAssUrlChanged(
 									(event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
