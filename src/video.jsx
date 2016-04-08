@@ -217,31 +217,24 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 
 		const { video } = this.refs;
 
-		let videoPromise = null;
+		const videoPromise = (() => {
+			switch (videoChoice) {
+				case VideoChoice.LocalFile:
+					video.src = URL.createObjectURL(videoFile);
+					return metadataLoaded(video);
 
-		switch (videoChoice) {
-			case VideoChoice.LocalFile:
-				video.src = URL.createObjectURL(videoFile);
-				videoPromise = metadataLoaded(video);
-				break;
+				case VideoChoice.Url:
+					video.src = videoUrl;
+					return metadataLoaded(video);
 
-			case VideoChoice.Url:
-				video.src = videoUrl;
-				videoPromise = metadataLoaded(video);
-				break;
+				case VideoChoice.Sample:
+					return metadataLoaded(video);
 
-			case VideoChoice.Sample:
-				videoPromise = metadataLoaded(video);
-				break;
-
-			case VideoChoice.Dummy:
-				const [dummyVideoWidth, dummyVideoHeight] = videoDummyResolution;
-				videoPromise = makeDummyVideo(video, dummyVideoWidth, dummyVideoHeight, videoDummyColor, videoDummyDuration);
-				break;
-		}
-
-		videoPromise =
-			videoPromise.then(() => {
+				case VideoChoice.Dummy:
+					const [dummyVideoWidth, dummyVideoHeight] = videoDummyResolution;
+					return makeDummyVideo(video, dummyVideoWidth, dummyVideoHeight, videoDummyColor, videoDummyDuration);
+			}
+		})().then(() => {
 				console.log("Video metadata loaded.");
 
 				onVideoMetadataLoaded([video.videoWidth, video.videoHeight]);
@@ -252,21 +245,18 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 				throw reason;
 			});
 
-		let assPromise = null;
+		const assPromise = (() => {
+			switch (assChoice) {
+				case AssChoice.LocalFile:
+					return libjass.ASS.fromUrl(URL.createObjectURL(assFile));
 
-		switch (assChoice) {
-			case AssChoice.LocalFile:
-				assPromise = libjass.ASS.fromUrl(URL.createObjectURL(assFile));
-				break;
-			case AssChoice.Url:
-				assPromise = libjass.ASS.fromUrl(assUrl);
-				break;
-			case AssChoice.Text:
-				assPromise = libjass.ASS.fromString(assText);
-				break;
-		}
+				case AssChoice.Url:
+					return libjass.ASS.fromUrl(assUrl);
 
-		assPromise = assPromise.then(ass => {
+				case AssChoice.Text:
+					return libjass.ASS.fromString(assText);
+			}
+		})().then(ass => {
 			console.log("Script received.");
 
 			window.ass = ass;
