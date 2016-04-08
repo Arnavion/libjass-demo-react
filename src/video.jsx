@@ -340,7 +340,7 @@ export function reducer(
 			const { subsEnabled } = action.payload;
 			return {
 				...state,
-				subsEnabled
+				subsEnabled,
 			};
 
 		case Actions.VideoMetadataLoaded:
