@@ -127,6 +127,8 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 			onEnableDisableSubs,
 
 			videoChoice,
+			videoFile,
+			videoUrl,
 		} = this.props;
 
 		if (renderer !== null) {
@@ -140,6 +142,17 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 					<video controls={ true } ref="video"
 						width={ (currentResolution !== null) ? currentResolution[0] : "" }
 						height={ (currentResolution !== null) ? currentResolution[1] : "" }
+						src={
+							(() => {
+								switch (videoChoice) {
+									case VideoChoice.LocalFile:
+										return videoFile;
+
+									case VideoChoice.Url:
+										return videoUrl;
+								}
+							})()
+						}
 					>{
 						(videoChoice === VideoChoice.Sample) ? [
 								<source key={ 0 } type="video/webm" src="sample.webm" />,
@@ -197,8 +210,6 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 	componentDidMount() {
 		const {
 			videoChoice,
-			videoFile,
-			videoUrl,
 			videoDummyResolution,
 			videoDummyColor,
 			videoDummyDuration,
@@ -220,13 +231,7 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 		const videoPromise = (() => {
 			switch (videoChoice) {
 				case VideoChoice.LocalFile:
-					video.src = URL.createObjectURL(videoFile);
-					return metadataLoaded(video);
-
 				case VideoChoice.Url:
-					video.src = videoUrl;
-					return metadataLoaded(video);
-
 				case VideoChoice.Sample:
 					return metadataLoaded(video);
 
@@ -248,7 +253,7 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 		const assPromise = (() => {
 			switch (assChoice) {
 				case AssChoice.LocalFile:
-					return libjass.ASS.fromUrl(URL.createObjectURL(assFile));
+					return libjass.ASS.fromUrl(assFile);
 
 				case AssChoice.Url:
 					return libjass.ASS.fromUrl(assUrl);

@@ -263,7 +263,7 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 							onChange={ event =>
 								onVideoFileChanged(
 									(event.target.files.length === 1) ?
-										event.target.files[0] :
+										URL.createObjectURL(event.target.files[0]) :
 										null
 								)
 							}
@@ -366,7 +366,7 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 							onChange={ event =>
 								onAssFileChanged(
 									(event.target.files.length === 1) ?
-										event.target.files[0] :
+										URL.createObjectURL(event.target.files[0]) :
 										null
 								)
 							}
@@ -549,7 +549,13 @@ export function reducer(
 			}
 
 		case Actions.VideoFileChanged:
+			const { videoFile: previousVideoFile } = state;
+			if (previousVideoFile !== null) {
+				URL.revokeObjectUrl(previousVideoFile);
+			}
+
 			const { videoFile } = action.payload;
+
 			return {
 				...state,
 				videoFile,
@@ -591,6 +597,11 @@ export function reducer(
 			}
 
 		case Actions.AssFileChanged:
+			const { assFile: previousAssFile } = state;
+			if (previousAssFile !== null) {
+				URL.revokeObjectUrl(previousAssFile);
+			}
+
 			const { assFile } = action.payload;
 			return {
 				...state,
