@@ -64,12 +64,12 @@ Promise.all(promises).then(([babel, react, reactRedux, redux]) => new Promise((r
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>libjass demo</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${ babel }/polyfill${ prod ? ".min" : "" }.js" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react${ prod ? ".min" : "" }.js" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react-dom${ prod ? ".min" : "" }.js" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/${ redux }/redux${ prod ? ".min" : "" }.js" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/${ reactRedux }/react-redux${ prod ? ".min" : "" }.js" />
-		<script src="index.js" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${ babel }/polyfill${ prod ? ".min" : "" }.js" defer="defer" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react${ prod ? ".min" : "" }.js" defer="defer" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react-dom${ prod ? ".min" : "" }.js" defer="defer" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/${ redux }/redux${ prod ? ".min" : "" }.js" defer="defer" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/${ reactRedux }/react-redux${ prod ? ".min" : "" }.js" defer="defer" />
+		<script src="index.js" defer="defer" />
 	</head>
 	<body>
 		<div id="root" />
