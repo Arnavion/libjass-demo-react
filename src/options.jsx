@@ -258,6 +258,7 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 							}
 						</label>
 						<input type="file"
+							accept="video/*"
 							disabled={ !fileInputsEnabled }
 							defaultValue={ null }
 							onChange={ event =>
@@ -361,6 +362,7 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 							}
 						</label>
 						<input type="file"
+							accept=".ass"
 							disabled={ !fileInputsEnabled }
 							defaultValue={ null }
 							onChange={ event =>
