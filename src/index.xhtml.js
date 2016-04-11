@@ -24,39 +24,36 @@ import { writeFile } from "fs";
 import request from "request";
 import { satisfies } from "semver";
 
-const promises = [];
-
-for (const [name, requiredVersion] of [
+const promises = [
 	["babel-polyfill", "6.x"],
 	["react", "15.x"],
 	["react-redux", "4.x"],
 	["redux", "3.x"]
-]) {
-	promises.push(new Promise((resolve, reject) =>
+].map(([name, requiredVersion]) => new Promise((resolve, reject) =>
 		request(`https://api.cdnjs.com/libraries/${ name }`, (err, response, body) => {
-			if (err) {
-				reject(err);
-				return;
+		if (err) {
+			reject(err);
+			return;
+		}
+
+		if (response.statusCode !== 200) {
+			reject(response.statusCode);
+			return;
+		}
+
+		resolve(body);
+	})).then(body => {
+		const json = JSON.parse(body);
+
+		for (const { version } of json.assets) {
+			if (satisfies(version, requiredVersion)) {
+				return version;
 			}
+		}
 
-			if (response.statusCode !== 200) {
-				reject(response.statusCode);
-				return;
-			}
-
-			resolve(body);
-		})).then(body => {
-			const json = JSON.parse(body);
-
-			for (const { version } of json.assets) {
-				if (satisfies(version, requiredVersion)) {
-					return version;
-				}
-			}
-
-			throw new Error(`No version found for ${ name }:${ requiredVersion }.`);
-		}));
-}
+		throw new Error(`No version found for ${ name }:${ requiredVersion }.`);
+	})
+);
 
 Promise.all(promises).then(([babel, react, reactRedux, redux]) => new Promise((resolve, reject) => {
 	const xhtml =
