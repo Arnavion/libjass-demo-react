@@ -35,7 +35,7 @@ export const App = connect(({ app }) => app)(({
 	currentScreen,
 }) => (
 	<div>
-		<p>This is a demo page for the libjass library - a library for displaying ASS subtitles on HTML5 video. See the source of index.js for an explanation of how to use the library.</p>
+		<p>This is a version of <a href="https://github.com/Arnavion/libjass">libjass's</a> online <a href="https://arnavion.github.io/libjass/demo/">demo</a> made using <a href="https://facebook.github.io/react/">React.</a></p>
 
 		{ (() => {
 			switch (currentScreen) {
