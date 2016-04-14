@@ -22,21 +22,13 @@ import libjass from "libjass";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
-function mapDispatchToProps(dispatch) {
-	return {
-		onAdd(type, text) {
-			dispatch({
-				type: Actions.ConsoleAdd,
-				payload: {
-					type,
-					text,
-				}
-			});
-		},
-	};
-}
+import { createReducer, makeUniqueActions } from "./redux-helpers";
 
-export const Console = connect(({ console }) => console, mapDispatchToProps)(class extends Component {
+const Actions = makeUniqueActions({
+	onAdd: ((type, text) => ({ type, text })),
+});
+
+export const Console = connect(({ console }) => console, Actions)(class extends Component {
 	render() {
 		const { entries } = this.props;
 
@@ -107,27 +99,14 @@ export const Console = connect(({ console }) => console, mapDispatchToProps)(cla
 	}
 });
 
-const Actions = {
-	ConsoleAdd: 0,
-};
-
-export function reducer(
-	state = {
-		entries: [],
-	},
-	action
-) {
-	switch (action.type) {
-		case Actions.ConsoleAdd:
-			const { type, text } = action.payload;
-			return {
-				entries: [
-					...state.entries,
-					{ type, text }
-				]
-			};
-
-		default:
-			return state;
-	}
-}
+export const reducer = createReducer({
+	entries: [],
+}, {
+	[Actions.onAdd.type]: (state, { type, text }) => ({
+		...state,
+		entries: [
+			...state.entries,
+			{ type, text },
+		],
+	}),
+});

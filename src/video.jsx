@@ -24,6 +24,7 @@ import { connect } from "react-redux";
 
 import { makeDummyVideo } from "./dummy-video";
 import { VideoChoice, AssChoice } from "./options.jsx";
+import { createReducer, makeUniqueActions } from "./redux-helpers";
 
 function mapStateToProps({
 	options: {
@@ -62,59 +63,21 @@ function mapStateToProps({
 	};
 }
 
-function mapDispatchToProps(dispatch) {
-	return {
-		onChangeToVideoResolution() {
-			dispatch({
-				type: Actions.ChangeToVideoResolution,
-			});
-		},
+const Actions = makeUniqueActions({
+	onChangeToVideoResolution: () => undefined,
 
-		onChangeToScriptResolution() {
-			dispatch({
-				type: Actions.ChangeToScriptResolution,
-			});
-		},
+	onChangeToScriptResolution: () => undefined,
 
-		onEnableDisableSubs(subsEnabled) {
-			dispatch({
-				type: Actions.EnableDisableSubs,
-				payload: {
-					subsEnabled,
-				},
-			});
-		},
+	onEnableDisableSubs: subsEnabled => ({ subsEnabled }),
 
-		onVideoMetadataLoaded(videoResolution) {
-			dispatch({
-				type: Actions.VideoMetadataLoaded,
-				payload: {
-					videoResolution,
-				},
-			});
-		},
+	onVideoMetadataLoaded: videoResolution => ({ videoResolution }),
 
-		onScriptLoaded(assResolution) {
-			dispatch({
-				type: Actions.ScriptLoaded,
-				payload: {
-					assResolution,
-				},
-			});
-		},
+	onScriptLoaded: assResolution => ({ assResolution }),
 
-		onRendererCreated(renderer) {
-			dispatch({
-				type: Actions.RendererCreated,
-				payload: {
-					renderer,
-				},
-			});
-		},
-	};
-}
+	onRendererCreated: renderer => ({ renderer }),
+});
 
-export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends Component {
+export const Video = connect(mapStateToProps, Actions)(class extends Component {
 	render() {
 		const {
 			videoResolution, assResolution,
@@ -294,74 +257,32 @@ export const Video = connect(mapStateToProps, mapDispatchToProps)(class extends 
 	}
 });
 
-const Actions = {
-	ChangeToVideoResolution: 13,
-	ChangeToScriptResolution: 14,
-	EnableDisableSubs: 15,
-	VideoMetadataLoaded: 16,
-	ScriptLoaded: 17,
-	RendererCreated: 18,
-};
+export const reducer = createReducer({
+	videoResolution: null,
+	assResolution: null,
 
-export function reducer(
-	state = {
-		videoResolution: null,
-		assResolution: null,
+	subsEnabled: true,
 
-		subsEnabled: true,
+	currentResolution: null,
 
-		currentResolution: null,
+	renderer: null,
+}, {
+	[Actions.onChangeToVideoResolution.type]: state => ({ ...state, currentResolution: [...state.videoResolution] }),
 
-		renderer: null,
-	},
-	action
-) {
-	switch (action.type) {
-		case Actions.ChangeToVideoResolution:
-			return {
-				...state,
-				currentResolution: [...state.videoResolution],
-			};
+	[Actions.onChangeToScriptResolution.type]: state => ({ ...state, currentResolution: [...state.assResolution] }),
 
-		case Actions.ChangeToScriptResolution:
-			return {
-				...state,
-				currentResolution: [...state.assResolution],
-			};
+	[Actions.onEnableDisableSubs.type]: (state, { subsEnabled }) => ({ ...state, subsEnabled }),
 
-		case Actions.EnableDisableSubs:
-			const { subsEnabled } = action.payload;
-			return {
-				...state,
-				subsEnabled,
-			};
+	[Actions.onVideoMetadataLoaded.type]: (state, { videoResolution }) => ({
+		...state,
+		videoResolution,
+		currentResolution: [...videoResolution],
+	}),
 
-		case Actions.VideoMetadataLoaded:
-			const { videoResolution } = action.payload;
-			return {
-				...state,
-				videoResolution,
-				currentResolution: [...videoResolution],
-			};
+	[Actions.onScriptLoaded.type]: (state, { assResolution }) => ({ ...state, assResolution }),
 
-		case Actions.ScriptLoaded:
-			const { assResolution } = action.payload;
-			return {
-				...state,
-				assResolution,
-			};
-
-		case Actions.RendererCreated:
-			const { renderer } = action.payload;
-			return {
-				...state,
-				renderer,
-			};
-
-		default:
-			return state;
-	}
-}
+	[Actions.onRendererCreated.type]: (state, { renderer }) => ({ ...state, renderer }),
+});
 
 function metadataLoaded(video) {
 	return new Promise((resolve, reject) => {

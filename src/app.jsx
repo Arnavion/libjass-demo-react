@@ -23,7 +23,8 @@ import { connect } from "react-redux";
 import { combineReducers } from "redux";
 
 import { Console, reducer as consoleReducer } from "./console.jsx";
-import { Actions, Options, reducer as optionsReducer } from "./options.jsx";
+import { Actions as OptionsActions, Options, reducer as optionsReducer } from "./options.jsx";
+import { createReducer } from "./redux-helpers";
 import { Video, reducer as videoReducer } from "./video.jsx";
 
 const Screens = {
@@ -61,23 +62,14 @@ export const App = connect(({ app }) => app)(({
 	</div>
 ));
 
-function appReducer(
-	state = {
-		currentScreen: Screens.Options,
-	},
-	action
-) {
-	switch (action.type) {
-		case Actions.OptionsSelected:
-			return {
-				...state,
-				currentScreen: Screens.Video,
-			};
-
-		default:
-			return state;
-	}
-}
+const appReducer = createReducer({
+	currentScreen: Screens.Options,
+}, {
+	[OptionsActions.onSelected.type]: state => ({
+		...state,
+		currentScreen: Screens.Video,
+	}),
+});
 
 export const reducer = combineReducers({
 	app: appReducer,

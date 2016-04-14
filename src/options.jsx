@@ -22,145 +22,63 @@ import libjass from "libjass";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
+import { createReducer, makeUniqueActions } from "./redux-helpers";
+
 import defaultAssText from "raw!./default.ass";
 
-function mapDispatchToProps(dispatch) {
-	return {
-		onVideoChoiceChanged(videoChoice) {
-			dispatch({
-				type: Actions.VideoChoiceChanged,
-				payload: {
-					videoChoice
-				}
-			});
-		},
+export const Actions = makeUniqueActions({
+	onVideoChoiceChanged: videoChoice => ({ videoChoice }),
 
-		onVideoFileChanged(videoFile) {
-			dispatch({
-				type: Actions.VideoFileChanged,
-				payload: {
-					videoFile
-				}
-			});
-		},
+	onVideoFileChanged: videoFile => ({ videoFile }),
 
-		onVideoUrlChanged(videoUrl) {
-			dispatch({
-				type: Actions.VideoUrlChanged,
-				payload: {
-					videoUrl
-				}
-			});
-		},
+	onVideoUrlChanged: videoUrl => ({ videoUrl }),
 
-		onVideoDummyResolutionChanged(videoDummyResolution) {
-			dispatch({
-				type: Actions.VideoDummyResolutionChanged,
-				payload: {
-					videoDummyResolution
-				}
-			});
-		},
+	onVideoDummyResolutionChanged: videoDummyResolution => ({ videoDummyResolution }),
 
-		onVideoDummyColorChanged(videoDummyColor) {
-			dispatch({
-				type: Actions.VideoDummyColorChanged,
-				payload: {
-					videoDummyColor
-				}
-			});
-		},
+	onVideoDummyColorChanged: videoDummyColor => ({ videoDummyColor }),
 
-		onVideoDummyDurationChanged(videoDummyDuration) {
-			dispatch({
-				type: Actions.VideoDummyDurationChanged,
-				payload: {
-					videoDummyDuration
-				}
-			});
-		},
+	onVideoDummyDurationChanged: videoDummyDuration => ({ videoDummyDuration }),
 
-		onAssChoiceChanged(assChoice) {
-			dispatch({
-				type: Actions.AssChoiceChanged,
-				payload: {
-					assChoice
-				}
-			});
-		},
+	onAssChoiceChanged: assChoice => ({ assChoice }),
 
-		onAssFileChanged(assFile) {
-			dispatch({
-				type: Actions.AssFileChanged,
-				payload: {
-					assFile
-				}
-			});
-		},
+	onAssFileChanged: assFile => ({ assFile }),
 
-		onAssUrlChanged(assUrl) {
-			dispatch({
-				type: Actions.AssUrlChanged,
-				payload: {
-					assUrl
-				}
-			});
-		},
+	onAssUrlChanged: assUrl => ({ assUrl }),
 
-		onAssTextChanged(assText) {
-			dispatch({
-				type: Actions.AssTextChanged,
-				payload: {
-					assText
-				}
-			});
-		},
+	onAssTextChanged: assText => ({ assText }),
 
-		onEnableDisableSvg(enableSvg) {
-			dispatch({
-				type: Actions.EnableDisableSvg,
-				payload: {
-					enableSvg
-				}
-			});
-		},
+	onEnableDisableSvg: enableSvg => ({ enableSvg }),
 
-		onSelected(
-			videoChoice,
-			videoFile,
-			videoUrl,
-			videoDummyResolution,
-			videoDummyColor,
-			videoDummyDuration,
+	onSelected: (
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
 
-			assChoice,
-			assFile,
-			assUrl,
-			assText,
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
 
-			enableSvg
-		) {
-			dispatch({
-				type: Actions.OptionsSelected,
-				payload: {
-					videoChoice,
-					videoFile,
-					videoUrl,
-					videoDummyResolution,
-					videoDummyColor,
-					videoDummyDuration,
+		enableSvg
+	) => ({
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
 
-					assChoice,
-					assFile,
-					assUrl,
-					assText,
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
 
-					enableSvg,
-				}
-			});
-		},
-	};
-}
+		enableSvg,
+	}),
+});
 
 export const VideoChoice = {
 	LocalFile: 0,
@@ -175,7 +93,7 @@ export const AssChoice = {
 	Text: 2,
 };
 
-export const Options = connect(({ options }) => options, mapDispatchToProps)(({
+export const Options = connect(({ options }) => options, Actions)(({
 	videoChoice,
 	assChoice,
 
@@ -470,169 +388,60 @@ export const Options = connect(({ options }) => options, mapDispatchToProps)(({
 	);
 });
 
-export const Actions = {
-	VideoChoiceChanged: 1,
-	VideoFileChanged: 2,
-	VideoUrlChanged: 3,
-	VideoDummyResolutionChanged: 4,
-	VideoDummyColorChanged: 5,
-	VideoDummyDurationChanged: 6,
+export const reducer = createReducer({
+	videoChoice: VideoChoice.Sample,
+	videoFile: null,
+	videoUrl: null,
+	videoDummyResolution: [1280, 720],
+	videoDummyColor: "#2fa3fe",
+	videoDummyDuration: 25 * 60,
 
-	AssChoiceChanged: 7,
-	AssFileChanged: 8,
-	AssUrlChanged: 9,
-	AssTextChanged: 10,
+	assChoice: AssChoice.Text,
+	assFile: null,
+	assUrl: null,
+	assText: defaultAssText,
 
-	EnableDisableSvg: 11,
+	enableSvg: null,
+}, {
+	[Actions.onVideoChoiceChanged.type]: (state, { videoChoice }) => ({ ...state, videoChoice }),
 
-	OptionsSelected: 12,
-};
+	[Actions.onVideoFileChanged.type]: (state, { videoFile }) => {
+		const { videoFile: previousVideoFile } = state;
+		if (previousVideoFile !== null) {
+			URL.revokeObjectURL(previousVideoFile);
+		}
 
-export function reducer(
-	state = {
-		videoChoice: VideoChoice.Sample,
-		videoFile: null,
-		videoUrl: null,
-		videoDummyResolution: [1280, 720],
-		videoDummyColor: "#2fa3fe",
-		videoDummyDuration: 25 * 60,
-
-		assChoice: AssChoice.Text,
-		assFile: null,
-		assUrl: null,
-		assText: defaultAssText,
-
-		enableSvg: null,
+		return {
+			...state,
+			videoFile,
+		};
 	},
-	action
-) {
-	switch (action.type) {
-		case Actions.OptionsSelected: {
-			const {
-				videoChoice,
-				videoFile,
-				videoUrl,
-				videoDummyResolution,
-				videoDummyColor,
-				videoDummyDuration,
 
-				assChoice,
-				assFile,
-				assUrl,
-				assText,
+	[Actions.onVideoUrlChanged.type]: (state, { videoUrl }) => ({ ...state, videoUrl }),
 
-				enableSvg,
-			} = action.payload;
+	[Actions.onVideoDummyResolutionChanged.type]: (state, { videoDummyResolution }) => ({ ...state, videoDummyResolution }),
 
-			return {
-				...state,
+	[Actions.onVideoDummyColorChanged.type]: (state, { videoDummyColor }) => ({ ...state, videoDummyColor }),
 
-				videoChoice,
-				videoFile,
-				videoUrl,
-				videoDummyResolution,
-				videoDummyColor,
-				videoDummyDuration,
+	[Actions.onVideoDummyDurationChanged.type]: (state, { videoDummyDuration }) => ({ ...state, videoDummyDuration }),
 
-				assChoice,
-				assFile,
-				assUrl,
-				assText,
+	[Actions.onAssChoiceChanged.type]: (state, { assChoice }) => ({ ...state, assChoice }),
 
-				enableSvg,
-			}
+	[Actions.onAssFileChanged.type]: (state, { assFile }) => {
+		const { assFile: previousAssFile } = state;
+		if (previousAssFile !== null) {
+			URL.revokeObjectURL(previousAssFile);
 		}
 
-		case Actions.VideoChoiceChanged:
-			const { videoChoice } = action.payload;
-			return {
-				...state,
-				videoChoice,
-			}
+		return {
+			...state,
+			assFile,
+		};
+	},
 
-		case Actions.VideoFileChanged:
-			const { videoFile: previousVideoFile } = state;
-			if (previousVideoFile !== null) {
-				URL.revokeObjectUrl(previousVideoFile);
-			}
+	[Actions.onAssUrlChanged.type]: (state, { assUrl }) => ({ ...state, assUrl }),
 
-			const { videoFile } = action.payload;
+	[Actions.onAssTextChanged.type]: (state, { assText }) => ({ ...state, assText }),
 
-			return {
-				...state,
-				videoFile,
-			}
-
-		case Actions.VideoUrlChanged:
-			const { videoUrl } = action.payload;
-			return {
-				...state,
-				videoUrl,
-			}
-
-		case Actions.VideoDummyResolutionChanged:
-			const { videoDummyResolution } = action.payload;
-			return {
-				...state,
-				videoDummyResolution,
-			}
-
-		case Actions.VideoDummyColorChanged:
-			const { videoDummyColor } = action.payload;
-			return {
-				...state,
-				videoDummyColor,
-			}
-
-		case Actions.VideoDummyDurationChanged:
-			const { videoDummyDuration } = action.payload;
-			return {
-				...state,
-				videoDummyDuration,
-			}
-
-		case Actions.AssChoiceChanged:
-			const { assChoice } = action.payload;
-			return {
-				...state,
-				assChoice,
-			}
-
-		case Actions.AssFileChanged:
-			const { assFile: previousAssFile } = state;
-			if (previousAssFile !== null) {
-				URL.revokeObjectUrl(previousAssFile);
-			}
-
-			const { assFile } = action.payload;
-			return {
-				...state,
-				assFile,
-			}
-
-		case Actions.AssUrlChanged:
-			const { assUrl } = action.payload;
-			return {
-				...state,
-				assUrl,
-			}
-
-		case Actions.AssTextChanged:
-			const { assText } = action.payload;
-			return {
-				...state,
-				assText,
-			}
-
-		case Actions.EnableDisableSvg: {
-			const { enableSvg } = action.payload;
-			return {
-				...state,
-				enableSvg,
-			}
-		}
-
-		default:
-			return state;
-	}
-}
+	[Actions.onEnableDisableSvg.type]: (state, { enableSvg }) => ({ ...state, enableSvg }),
+});
