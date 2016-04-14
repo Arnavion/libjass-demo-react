@@ -32,7 +32,7 @@ const Screens = {
 	Video: 1,
 };
 
-export const App = connect(({ app }) => app)(({
+export const App = connect(({ app }) => app, {})(({
 	currentScreen,
 }) => (
 	<div>
