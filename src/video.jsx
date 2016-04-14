@@ -26,58 +26,7 @@ import { makeDummyVideo } from "./dummy-video";
 import { VideoChoice, AssChoice } from "./options.jsx";
 import { createReducer, makeUniqueActions } from "./redux-helpers";
 
-function mapStateToProps({
-	options: {
-		videoChoice,
-		videoFile,
-		videoUrl,
-		videoDummyResolution,
-		videoDummyColor,
-		videoDummyDuration,
-
-		assChoice,
-		assFile,
-		assUrl,
-		assText,
-
-		enableSvg
-	},
-	video
-}) {
-	return {
-		...video,
-
-		videoChoice,
-		videoFile,
-		videoUrl,
-		videoDummyResolution,
-		videoDummyColor,
-		videoDummyDuration,
-
-		assChoice,
-		assFile,
-		assUrl,
-		assText,
-
-		enableSvg,
-	};
-}
-
-const Actions = makeUniqueActions({
-	onChangeToVideoResolution: () => undefined,
-
-	onChangeToScriptResolution: () => undefined,
-
-	onEnableDisableSubs: subsEnabled => ({ subsEnabled }),
-
-	onVideoMetadataLoaded: videoResolution => ({ videoResolution }),
-
-	onScriptLoaded: assResolution => ({ assResolution }),
-
-	onRendererCreated: renderer => ({ renderer }),
-});
-
-export const Video = connect(mapStateToProps, Actions)(class extends Component {
+class _Video extends Component {
 	render() {
 		const {
 			videoResolution, assResolution,
@@ -255,7 +204,60 @@ export const Video = connect(mapStateToProps, Actions)(class extends Component {
 			onRendererCreated(renderer);
 		});
 	}
+}
+
+function mapStateToProps({
+	options: {
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
+
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
+
+		enableSvg
+	},
+	video
+}) {
+	return {
+		...video,
+
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
+
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
+
+		enableSvg,
+	};
+}
+
+const Actions = makeUniqueActions({
+	onChangeToVideoResolution: () => undefined,
+
+	onChangeToScriptResolution: () => undefined,
+
+	onEnableDisableSubs: subsEnabled => ({ subsEnabled }),
+
+	onVideoMetadataLoaded: videoResolution => ({ videoResolution }),
+
+	onScriptLoaded: assResolution => ({ assResolution }),
+
+	onRendererCreated: renderer => ({ renderer }),
 });
+
+export const Video = connect(mapStateToProps, Actions)(props => <_Video { ...props } />);
 
 export const reducer = createReducer({
 	videoResolution: null,

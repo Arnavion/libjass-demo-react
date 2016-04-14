@@ -26,60 +26,6 @@ import { createReducer, makeUniqueActions } from "./redux-helpers";
 
 import defaultAssText from "raw!./default.ass";
 
-export const Actions = makeUniqueActions({
-	onVideoChoiceChanged: videoChoice => ({ videoChoice }),
-
-	onVideoFileChanged: videoFile => ({ videoFile }),
-
-	onVideoUrlChanged: videoUrl => ({ videoUrl }),
-
-	onVideoDummyResolutionChanged: videoDummyResolution => ({ videoDummyResolution }),
-
-	onVideoDummyColorChanged: videoDummyColor => ({ videoDummyColor }),
-
-	onVideoDummyDurationChanged: videoDummyDuration => ({ videoDummyDuration }),
-
-	onAssChoiceChanged: assChoice => ({ assChoice }),
-
-	onAssFileChanged: assFile => ({ assFile }),
-
-	onAssUrlChanged: assUrl => ({ assUrl }),
-
-	onAssTextChanged: assText => ({ assText }),
-
-	onEnableDisableSvg: enableSvg => ({ enableSvg }),
-
-	onSelected: (
-		videoChoice,
-		videoFile,
-		videoUrl,
-		videoDummyResolution,
-		videoDummyColor,
-		videoDummyDuration,
-
-		assChoice,
-		assFile,
-		assUrl,
-		assText,
-
-		enableSvg
-	) => ({
-		videoChoice,
-		videoFile,
-		videoUrl,
-		videoDummyResolution,
-		videoDummyColor,
-		videoDummyDuration,
-
-		assChoice,
-		assFile,
-		assUrl,
-		assText,
-
-		enableSvg,
-	}),
-});
-
 export const VideoChoice = {
 	LocalFile: 0,
 	Url: 1,
@@ -93,7 +39,7 @@ export const AssChoice = {
 	Text: 2,
 };
 
-export const Options = connect(({ options }) => options, Actions)(({
+function _Options({
 	videoChoice,
 	assChoice,
 
@@ -124,7 +70,7 @@ export const Options = connect(({ options }) => options, Actions)(({
 	onEnableDisableSvg,
 
 	onSelected,
-}) => {
+}) {
 	const fileInputsEnabled = (typeof URL !== "undefined" && typeof URL.createObjectURL === "function");
 	const dummyVideoEnabled = (
 		typeof HTMLCanvasElement.prototype.captureStream === "function" &&
@@ -386,7 +332,63 @@ export const Options = connect(({ options }) => options, Actions)(({
 			>Go</button>
 		</div>
 	);
+}
+
+export const Actions = makeUniqueActions({
+	onVideoChoiceChanged: videoChoice => ({ videoChoice }),
+
+	onVideoFileChanged: videoFile => ({ videoFile }),
+
+	onVideoUrlChanged: videoUrl => ({ videoUrl }),
+
+	onVideoDummyResolutionChanged: videoDummyResolution => ({ videoDummyResolution }),
+
+	onVideoDummyColorChanged: videoDummyColor => ({ videoDummyColor }),
+
+	onVideoDummyDurationChanged: videoDummyDuration => ({ videoDummyDuration }),
+
+	onAssChoiceChanged: assChoice => ({ assChoice }),
+
+	onAssFileChanged: assFile => ({ assFile }),
+
+	onAssUrlChanged: assUrl => ({ assUrl }),
+
+	onAssTextChanged: assText => ({ assText }),
+
+	onEnableDisableSvg: enableSvg => ({ enableSvg }),
+
+	onSelected: (
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
+
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
+
+		enableSvg
+	) => ({
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
+
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
+
+		enableSvg,
+	}),
 });
+
+export const Options = connect(({ options }) => options, Actions)(props => <_Options { ...props } />);
 
 export const reducer = createReducer({
 	videoChoice: VideoChoice.Sample,

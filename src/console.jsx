@@ -24,11 +24,7 @@ import { connect } from "react-redux";
 
 import { createReducer, makeUniqueActions } from "./redux-helpers";
 
-const Actions = makeUniqueActions({
-	onAdd: ((type, text) => ({ type, text })),
-});
-
-export const Console = connect(({ console }) => console, Actions)(class extends Component {
+class _Console extends Component {
 	render() {
 		const { entries } = this.props;
 
@@ -97,7 +93,13 @@ export const Console = connect(({ console }) => console, Actions)(class extends 
 
 		Promise.resolve().then(() => this.props.onAdd(type, text));
 	}
+}
+
+const Actions = makeUniqueActions({
+	onAdd: ((type, text) => ({ type, text })),
 });
+
+export const Console = connect(({ console }) => console, Actions)(props => <_Console { ...props } />);
 
 export const reducer = createReducer({
 	entries: [],
