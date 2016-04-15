@@ -29,6 +29,7 @@ function _Console({
 
 	onEnableDisableDebugMode,
 	onEnableDisableVerboseMode,
+	onClear,
 }) {
 	return (
 		<fieldset className="console">
@@ -44,6 +45,9 @@ function _Console({
 						onChange={ event => onEnableDisableVerboseMode(event.target.checked) }
 					/> Enable verbose mode
 				</label>
+				<button type="button"
+					onClick={ onClear }
+				>Clear</button>
 			</legend>
 			{
 				entries.map(({ id, type, text }) =>
@@ -60,6 +64,8 @@ const Actions = makeUniqueActions({
 	onEnableDisableDebugMode: debugMode => ({ debugMode }),
 
 	onEnableDisableVerboseMode: verboseMode => ({ verboseMode }),
+
+	onClear: () => undefined,
 });
 
 export const Console = connect(({ console }) => console, Actions)(class extends Component {
@@ -75,6 +81,7 @@ export const Console = connect(({ console }) => console, Actions)(class extends 
 
 			onEnableDisableDebugMode,
 			onEnableDisableVerboseMode,
+			onClear,
 		} = this.props;
 
 		return (
@@ -83,6 +90,7 @@ export const Console = connect(({ console }) => console, Actions)(class extends 
 
 				onEnableDisableDebugMode,
 				onEnableDisableVerboseMode,
+				onClear
 			} } />
 		);
 	}
@@ -153,4 +161,6 @@ export const reducer = createReducer({
 
 		return ({ ...state, verboseMode });
 	},
+
+	[Actions.onClear.type]: state => ({ ...state, entries: [] }),
 });
