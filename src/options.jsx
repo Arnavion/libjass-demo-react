@@ -174,7 +174,7 @@ function _Options({
 						</label>
 						<select
 							disabled={ !dummyVideoEnabled }
-							value={ videoDummyResolution.join("x") }
+							defaultValue={ videoDummyResolution.join("x") }
 							onChange={ event => onVideoDummyResolutionChanged(event.target.value.split("x").map(value => parseInt(value))) }
 						>
 							<option value="640x480">640 x 480 (SD fullscreen)</option>
@@ -187,6 +187,14 @@ function _Options({
 							<option value="1920x1080">1920 x 1080 (HD 1080p)</option>
 							<option value="1024x576">1024 x 576 (SuperPAL widescreen)</option>
 						</select>
+						<input type="number"
+							value={ videoDummyResolution[0] }
+							onChange={ event => onVideoDummyResolutionChanged([parseInt(event.target.value), videoDummyResolution[1]]) }
+						/>
+						<input type="number"
+							value={ videoDummyResolution[1] }
+							onChange={ event => onVideoDummyResolutionChanged([videoDummyResolution[0], parseInt(event.target.value)]) }
+						/>
 						<input type="color"
 							disabled={ !dummyVideoEnabled }
 							value={ videoDummyColor }
