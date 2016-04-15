@@ -25,6 +25,12 @@ import { connect } from "react-redux";
 import { createReducer, makeUniqueActions } from "./redux-helpers";
 
 class _Console extends Component {
+	constructor(...args) {
+		super(...args);
+
+		this._lastItemId = 0;
+	}
+
 	render() {
 		const { entries } = this.props;
 
@@ -52,8 +58,8 @@ class _Console extends Component {
 					</label>
 				</legend>
 				{
-					entries.map((entry, i) =>
-						<div key={ i } className={ entry.type }>{ entry.text }</div>
+					entries.map(({ id, type, text }) =>
+						<div key={ id } className={ type }>{ text }</div>
 					)
 				}
 			</fieldset>
@@ -80,6 +86,8 @@ class _Console extends Component {
 	}
 
 	_add(type, items) {
+		const id = this._lastItemId++;
+
 		const text = items.reduce((text, item) => {
 			switch (typeof item) {
 				case "boolean":
@@ -91,12 +99,12 @@ class _Console extends Component {
 			}
 		}, `${ new Date().toString() }: `);
 
-		Promise.resolve().then(() => this.props.onAdd(type, text));
+		Promise.resolve().then(() => this.props.onAdd(id, type, text));
 	}
 }
 
 const Actions = makeUniqueActions({
-	onAdd: ((type, text) => ({ type, text })),
+	onAdd: ((id, type, text) => ({ id, type, text })),
 });
 
 export const Console = connect(({ console }) => console, Actions)(props => <_Console { ...props } />);
@@ -104,11 +112,11 @@ export const Console = connect(({ console }) => console, Actions)(props => <_Con
 export const reducer = createReducer({
 	entries: [],
 }, {
-	[Actions.onAdd.type]: (state, { type, text }) => ({
+	[Actions.onAdd.type]: (state, { id, type, text }) => ({
 		...state,
 		entries: [
 			...state.entries,
-			{ type, text },
+			{ id, type, text },
 		],
 	}),
 });
