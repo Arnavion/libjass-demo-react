@@ -24,7 +24,45 @@ import { connect } from "react-redux";
 
 import { createReducer, makeUniqueActions } from "./redux-helpers";
 
-class _Console extends Component {
+function _Console({
+	entries,
+
+	onEnableDisableDebugMode,
+	onEnableDisableVerboseMode,
+}) {
+	return (
+		<fieldset className="console">
+			<legend>
+				Console output
+				<label>
+					<input type="checkbox"
+						onChange={ event => onEnableDisableDebugMode(event.target.checked) }
+					/> Enable debug mode
+				</label>
+				<label>
+					<input type="checkbox"
+						onChange={ event => onEnableDisableVerboseMode(event.target.checked) }
+					/> Enable verbose mode
+				</label>
+			</legend>
+			{
+				entries.map(({ id, type, text }) =>
+					<div key={ id } className={ type }>{ text }</div>
+				)
+			}
+		</fieldset>
+	);
+}
+
+const Actions = makeUniqueActions({
+	onAdd: ((id, type, text) => ({ id, type, text })),
+
+	onEnableDisableDebugMode: debugMode => ({ debugMode }),
+
+	onEnableDisableVerboseMode: verboseMode => ({ verboseMode }),
+});
+
+export const Console = connect(({ console }) => console, Actions)(class extends Component {
 	constructor(...args) {
 		super(...args);
 
@@ -40,26 +78,12 @@ class _Console extends Component {
 		} = this.props;
 
 		return (
-			<fieldset className="console">
-				<legend>
-					Console output
-					<label>
-						<input type="checkbox"
-							onChange={ event => onEnableDisableDebugMode(event.target.checked) }
-						/> Enable debug mode
-					</label>
-					<label>
-						<input type="checkbox"
-							onChange={ event => onEnableDisableVerboseMode(event.target.checked) }
-						/> Enable verbose mode
-					</label>
-				</legend>
-				{
-					entries.map(({ id, type, text }) =>
-						<div key={ id } className={ type }>{ text }</div>
-					)
-				}
-			</fieldset>
+			<_Console { ...{
+				entries,
+
+				onEnableDisableDebugMode,
+				onEnableDisableVerboseMode,
+			} } />
 		);
 	}
 
@@ -98,13 +122,7 @@ class _Console extends Component {
 
 		Promise.resolve().then(() => this.props.onAdd(id, type, text));
 	}
-}
-
-const Actions = makeUniqueActions({
-	onAdd: ((id, type, text) => ({ id, type, text })),
 });
-
-export const Console = connect(({ console }) => console, Actions)(props => <_Console { ...props } />);
 
 export const reducer = createReducer({
 	entries: [],
