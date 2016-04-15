@@ -32,7 +32,12 @@ class _Console extends Component {
 	}
 
 	render() {
-		const { entries } = this.props;
+		const {
+			entries,
+
+			onEnableDisableDebugMode,
+			onEnableDisableVerboseMode,
+		} = this.props;
 
 		return (
 			<fieldset className="console">
@@ -40,20 +45,12 @@ class _Console extends Component {
 					Console output
 					<label>
 						<input type="checkbox"
-							onChange={ event => {
-								console.log(`${ event.target.checked ? "Enabling" : "Disabling" } debug mode.`);
-
-								libjass.debugMode = event.target.checked;
-							} }
+							onChange={ event => onEnableDisableDebugMode(event.target.checked) }
 						/> Enable debug mode
 					</label>
 					<label>
 						<input type="checkbox"
-							onChange={ event => {
-								console.log(`${ event.target.checked ? "Enabling" : "Disabling" } verbose mode.`);
-
-								libjass.verboseMode = event.target.checked;
-							} }
+							onChange={ event => onEnableDisableVerboseMode(event.target.checked) }
 						/> Enable verbose mode
 					</label>
 				</legend>
@@ -111,6 +108,9 @@ export const Console = connect(({ console }) => console, Actions)(props => <_Con
 
 export const reducer = createReducer({
 	entries: [],
+
+	debugMode: false,
+	verboseMode: false,
 }, {
 	[Actions.onAdd.type]: (state, { id, type, text }) => ({
 		...state,
@@ -119,4 +119,20 @@ export const reducer = createReducer({
 			{ id, type, text },
 		],
 	}),
+
+	[Actions.onEnableDisableDebugMode.type]: (state, { debugMode }) => {
+		console.log(`${ debugMode ? "Enabling" : "Disabling" } debug mode.`);
+
+		libjass.debugMode = debugMode;
+
+		return { ...state, debugMode };
+	},
+
+	[Actions.onEnableDisableVerboseMode.type]: (state, { verboseMode }) => {
+		console.log(`${ verboseMode ? "Enabling" : "Disabling" } verbose mode.`);
+
+		libjass.verboseMode = verboseMode;
+
+		return ({ ...state, verboseMode });
+	},
 });
