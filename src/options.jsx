@@ -175,7 +175,7 @@ function _Options({
 						<select
 							disabled={ !dummyVideoEnabled }
 							value={ videoDummyResolution.join("x") }
-							onChange={ event => onVideoDummyResolutionChanged(event.target.value.split("x")) }
+							onChange={ event => onVideoDummyResolutionChanged(event.target.value.split("x").map(value => parseInt(value))) }
 						>
 							<option value="640x480">640 x 480 (SD fullscreen)</option>
 							<option value="704x480">704 x 480 (SD anamorphic)</option>
