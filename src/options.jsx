@@ -19,7 +19,7 @@
  */
 
 import libjass from "libjass";
-import React, { Component } from "react";
+import React from "react";
 import { connect } from "react-redux";
 
 import { createReducer, makeUniqueActions } from "./redux-helpers";
