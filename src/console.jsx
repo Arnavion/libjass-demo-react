@@ -59,22 +59,61 @@ function _Console({
 }
 
 const Actions = makeUniqueActions({
-	onAdd: ((id, type, text) => ({ id, type, text })),
+	onMount: () => dispatch => {
+		const originalConsoleLog = console.log.bind(console);
+		console.log = (...items) => {
+			originalConsoleLog(...items);
+			dispatch(Actions.onAdd("log", items));
+		};
 
-	onEnableDisableDebugMode: debugMode => ({ debugMode }),
+		const originalConsoleWarn = console.warn.bind(console);
+		console.warn = (...items) => {
+			originalConsoleWarn(...items);
+			dispatch(Actions.onAdd("warning", items));
+		};
 
-	onEnableDisableVerboseMode: verboseMode => ({ verboseMode }),
+		const originalConsoleError = console.error.bind(console);
+		console.error = (...items) => {
+			originalConsoleError(...items);
+			dispatch(Actions.onAdd("error", items));
+		};
+	},
+
+	onAdd: (type, items) => {
+		const text = items.reduce((text, item) => {
+			switch (typeof item) {
+				case "boolean":
+				case "number":
+				case "string":
+					return `${ text }${ item } `;
+				default:
+					return `${ text }${ item } [Check browser console for more details.] `;
+			}
+		}, `${ new Date().toString() }: `);
+
+		return { type, text };
+	},
+
+	onEnableDisableDebugMode: debugMode => () => {
+		console.log(`${ debugMode ? "Enabling" : "Disabling" } debug mode.`);
+
+		libjass.debugMode = debugMode;
+
+		return { debugMode };
+	},
+
+	onEnableDisableVerboseMode: verboseMode => () => {
+		console.log(`${ verboseMode ? "Enabling" : "Disabling" } verbose mode.`);
+
+		libjass.verboseMode = verboseMode;
+
+		return { verboseMode };
+	},
 
 	onClear: () => undefined,
 });
 
 export const Console = connect(({ console }) => console, Actions)(class extends Component {
-	constructor(...args) {
-		super(...args);
-
-		this._lastItemId = 0;
-	}
-
 	render() {
 		const {
 			entries,
@@ -96,71 +135,29 @@ export const Console = connect(({ console }) => console, Actions)(class extends 
 	}
 
 	componentDidMount() {
-		const originalConsoleLog = console.log.bind(console);
-		const originalConsoleWarn = console.warn.bind(console);
-		const originalConsoleError = console.error.bind(console);
-
-		console.log = (...items) => {
-			originalConsoleLog(...items);
-			this._add("log", items);
-		};
-		console.warn = (...items) => {
-			originalConsoleWarn(...items);
-			this._add("warning", items);
-		};
-		console.error = (...items) => {
-			originalConsoleError(...items);
-			this._add("error", items);
-		};
-	}
-
-	_add(type, items) {
-		const id = this._lastItemId++;
-
-		const text = items.reduce((text, item) => {
-			switch (typeof item) {
-				case "boolean":
-				case "number":
-				case "string":
-					return `${ text }${ item } `;
-				default:
-					return `${ text }${ item } [Check browser console for more details.] `;
-			}
-		}, `${ new Date().toString() }: `);
-
-		Promise.resolve().then(() => this.props.onAdd(id, type, text));
+		this.props.onMount();
 	}
 });
 
 export const reducer = createReducer({
 	entries: [],
+	lastItemId: 0,
 
 	debugMode: false,
 	verboseMode: false,
 }, {
-	[Actions.onAdd.type]: (state, { id, type, text }) => ({
+	[Actions.onAdd.type]: (state, { type, text }) => ({
 		...state,
 		entries: [
 			...state.entries,
-			{ id, type, text },
+			{ id: state.lastItemId, type, text },
 		],
+		lastItemId: state.lastItemId + 1,
 	}),
 
-	[Actions.onEnableDisableDebugMode.type]: (state, { debugMode }) => {
-		console.log(`${ debugMode ? "Enabling" : "Disabling" } debug mode.`);
+	[Actions.onEnableDisableDebugMode.type]: (state, { debugMode }) => ({ ...state, debugMode }),
 
-		libjass.debugMode = debugMode;
-
-		return { ...state, debugMode };
-	},
-
-	[Actions.onEnableDisableVerboseMode.type]: (state, { verboseMode }) => {
-		console.log(`${ verboseMode ? "Enabling" : "Disabling" } verbose mode.`);
-
-		libjass.verboseMode = verboseMode;
-
-		return ({ ...state, verboseMode });
-	},
+	[Actions.onEnableDisableVerboseMode.type]: (state, { verboseMode }) => ({ ...state, verboseMode }),
 
 	[Actions.onClear.type]: state => ({ ...state, entries: [] }),
 });
