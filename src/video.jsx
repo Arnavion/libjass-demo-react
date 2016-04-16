@@ -29,18 +29,19 @@ import { createReducer, makeUniqueActions } from "./redux-helpers";
 class _Video extends Component {
 	render() {
 		const {
-			videoResolution, assResolution,
-			subsEnabled,
+			videoResolution,
+			assResolution,
 			currentResolution,
+			subsEnabled,
 			renderer,
-
-			onChangeToVideoResolution,
-			onChangeToScriptResolution,
-			onEnableDisableSubs,
 
 			videoChoice,
 			videoFile,
 			videoUrl,
+
+			onChangeToVideoResolution,
+			onChangeToScriptResolution,
+			onEnableDisableSubs,
 		} = this.props;
 
 		if (renderer !== null) {
@@ -120,93 +121,13 @@ class _Video extends Component {
 	}
 
 	componentDidMount() {
-		const {
-			videoChoice,
-			videoDummyResolution,
-			videoDummyColor,
-			videoDummyDuration,
-
-			assChoice,
-			assFile,
-			assUrl,
-			assText,
-
-			enableSvg,
-
-			onVideoMetadataLoaded,
-			onScriptLoaded,
-			onRendererCreated,
-		} = this.props;
-
-		const { video } = this.refs;
-
-		const videoPromise = (() => {
-			switch (videoChoice) {
-				case VideoChoice.LocalFile:
-				case VideoChoice.Url:
-				case VideoChoice.Sample:
-					return metadataLoaded(video);
-
-				case VideoChoice.Dummy:
-					const [dummyVideoWidth, dummyVideoHeight] = videoDummyResolution;
-					return makeDummyVideo(video, dummyVideoWidth, dummyVideoHeight, videoDummyColor, videoDummyDuration);
-			}
-		})().then(() => {
-				console.log("Video metadata loaded.");
-
-				onVideoMetadataLoaded([video.videoWidth, video.videoHeight]);
-			}).catch(reason => {
-				const errorCode = (reason.code !== undefined) ? [null, "MEDIA_ERR_ABORTED", "MEDIA_ERR_NETWORK", "MEDIA_ERR_DECODE", "MEDIA_ERR_SRC_NOT_SUPPORTED"][reason.code] : "";
-				console.error("Video could not be loaded: %o %o", errorCode, reason);
-
-				throw reason;
-			});
-
-		const assPromise = (() => {
-			switch (assChoice) {
-				case AssChoice.LocalFile:
-					return libjass.ASS.fromUrl(assFile);
-
-				case AssChoice.Url:
-					return libjass.ASS.fromUrl(assUrl);
-
-				case AssChoice.Text:
-					return libjass.ASS.fromString(assText);
-			}
-		})().then(ass => {
-			console.log("Script received.");
-
-			window.ass = ass;
-
-			onScriptLoaded([ass.properties.resolutionX, ass.properties.resolutionY]);
-
-			return ass;
-		}).catch(reason => {
-			console.error("ASS could not be loaded: %o", reason);
-			throw reason;
-		});
-
-		Promise.all([videoPromise, assPromise]).then(([, ass]) => {
-			const rendererSettings = { };
-			if (enableSvg !== null) {
-				rendererSettings.enableSvg = enableSvg;
-			}
-			const renderer = new libjass.renderers.WebRenderer(ass, new libjass.renderers.VideoClock(video), this.refs.subsWrapper, rendererSettings);
-
-			window.renderer = renderer;
-
-			renderer.addEventListener("ready", () => {
-				console.log("Beginning autoplay.");
-
-				video.play();
-			});
-
-			onRendererCreated(renderer);
-		});
+		this.props.onMount(this.refs.video, this.refs.subsWrapper);
 	}
 }
 
 function mapStateToProps({
+	video,
+
 	options: {
 		videoChoice,
 		videoFile,
@@ -222,7 +143,6 @@ function mapStateToProps({
 
 		enableSvg
 	},
-	video
 }) {
 	return {
 		...video,
@@ -244,6 +164,88 @@ function mapStateToProps({
 }
 
 const Actions = makeUniqueActions({
+	onMount: (video, subsWrapper) => (dispatch, getState) => {
+		const {
+			options: {
+				videoChoice,
+				videoDummyResolution,
+				videoDummyColor,
+				videoDummyDuration,
+
+				assChoice,
+				assFile,
+				assUrl,
+				assText,
+
+				enableSvg,
+			}
+		} = getState();
+
+		const videoPromise = (() => {
+			switch (videoChoice) {
+				case VideoChoice.LocalFile:
+				case VideoChoice.Url:
+				case VideoChoice.Sample:
+					return metadataLoaded(video);
+
+				case VideoChoice.Dummy:
+					const [dummyVideoWidth, dummyVideoHeight] = videoDummyResolution;
+					return makeDummyVideo(video, dummyVideoWidth, dummyVideoHeight, videoDummyColor, videoDummyDuration);
+			}
+		})().then(() => {
+			console.log("Video metadata loaded.");
+
+			dispatch(Actions.onVideoMetadataLoaded([video.videoWidth, video.videoHeight]));
+		}).catch(reason => {
+			const errorCode = (reason.code !== undefined) ? [null, "MEDIA_ERR_ABORTED", "MEDIA_ERR_NETWORK", "MEDIA_ERR_DECODE", "MEDIA_ERR_SRC_NOT_SUPPORTED"][reason.code] : "";
+			console.error("Video could not be loaded: %o %o", errorCode, reason);
+
+			throw reason;
+		});
+
+		const assPromise = (() => {
+			switch (assChoice) {
+				case AssChoice.LocalFile:
+					return libjass.ASS.fromUrl(assFile);
+
+				case AssChoice.Url:
+					return libjass.ASS.fromUrl(assUrl);
+
+				case AssChoice.Text:
+					return libjass.ASS.fromString(assText);
+			}
+		})().then(ass => {
+			console.log("Script received.");
+
+			window.ass = ass;
+
+			dispatch(Actions.onScriptLoaded([ass.properties.resolutionX, ass.properties.resolutionY]));
+
+			return ass;
+		}).catch(reason => {
+			console.error("ASS could not be loaded: %o", reason);
+			throw reason;
+		});
+
+		Promise.all([videoPromise, assPromise]).then(([, ass]) => {
+			const rendererSettings = { };
+			if (enableSvg !== null) {
+				rendererSettings.enableSvg = enableSvg;
+			}
+			const renderer = new libjass.renderers.WebRenderer(ass, new libjass.renderers.VideoClock(video), subsWrapper, rendererSettings);
+
+			window.renderer = renderer;
+
+			renderer.addEventListener("ready", () => {
+				console.log("Beginning autoplay.");
+
+				video.play();
+			});
+
+			dispatch(Actions.onRendererCreated(renderer));
+		});
+	},
+
 	onChangeToVideoResolution: () => undefined,
 
 	onChangeToScriptResolution: () => undefined,
@@ -257,16 +259,45 @@ const Actions = makeUniqueActions({
 	onRendererCreated: renderer => ({ renderer }),
 });
 
-export const Video = connect(mapStateToProps, Actions)(props => <_Video { ...props } />);
+export const Video = connect(mapStateToProps, Actions)(({
+	videoResolution,
+	assResolution,
+	currentResolution,
+	subsEnabled,
+	renderer,
+
+	videoChoice,
+	videoFile,
+	videoUrl,
+
+	onMount,
+	onChangeToVideoResolution,
+	onChangeToScriptResolution,
+	onEnableDisableSubs,
+}) =>
+	<_Video { ...{
+		videoResolution,
+		assResolution,
+		currentResolution,
+		subsEnabled,
+		renderer,
+
+		videoChoice,
+		videoFile,
+		videoUrl,
+
+		onMount,
+		onChangeToVideoResolution,
+		onChangeToScriptResolution,
+		onEnableDisableSubs,
+	} } />
+);
 
 export const reducer = createReducer({
 	videoResolution: null,
 	assResolution: null,
-
-	subsEnabled: true,
-
 	currentResolution: null,
-
+	subsEnabled: true,
 	renderer: null,
 }, {
 	[Actions.onChangeToVideoResolution.type]: state => ({ ...state, currentResolution: [...state.videoResolution] }),
