@@ -21,11 +21,22 @@
 import React from "react";
 import { render } from "react-dom";
 import { Provider } from "react-redux";
-import { createStore } from "redux";
+import { applyMiddleware, createStore } from "redux";
+import ReduxThunk from "redux-thunk";
 
 import "./index.css";
 import "libjass.css";
 
 import { App, reducer } from "./app.jsx";
 
-addEventListener("DOMContentLoaded", () => render(<Provider store={ createStore(reducer) }><App /></Provider>, document.querySelector("#root")));
+addEventListener("DOMContentLoaded", () => render(
+	<Provider store={
+		createStore(
+			reducer,
+			applyMiddleware(ReduxThunk)
+		)
+	}>
+		<App />
+	</Provider>,
+	document.querySelector("#root"))
+);

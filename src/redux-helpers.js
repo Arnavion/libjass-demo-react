@@ -28,10 +28,13 @@ export function makeUniqueActions(actions) {
 
 		const type = lastActionId++;
 
-		const action = (...args) => ({
-			type,
-			payload: payloadCreator(...args),
-		});
+		const action = (...args) => {
+			const payload = payloadCreator(...args);
+
+			return (typeof payload === "function") ?
+				(dispatch, getState) => ({ type, payload: payload(dispatch, getState) }) :
+				{ type, payload };
+		};
 
 		action.type = type;
 

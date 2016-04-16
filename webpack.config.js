@@ -50,7 +50,8 @@ module.exports = {
 		"react": "React",
 		"react-dom": "ReactDOM",
 		"react-redux": "ReactRedux",
-		"redux": "Redux"
+		"redux": "Redux",
+		"redux-thunk": "ReduxThunk"
 	},
 	resolve: {
 		alias: {

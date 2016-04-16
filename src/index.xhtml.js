@@ -28,7 +28,8 @@ const promises = [
 	["babel-polyfill", "6.x"],
 	["react", "15.x"],
 	["react-redux", "4.x"],
-	["redux", "3.x"]
+	["redux", "3.x"],
+	["redux-thunk", "2.x"]
 ].map(([name, requiredVersion]) => new Promise((resolve, reject) =>
 		request(`https://api.cdnjs.com/libraries/${ name }`, (err, response, body) => {
 		if (err) {
@@ -55,7 +56,7 @@ const promises = [
 	})
 );
 
-Promise.all(promises).then(([babel, react, reactRedux, redux]) => new Promise((resolve, reject) => {
+Promise.all(promises).then(([babel, react, reactRedux, redux, reduxThunk]) => new Promise((resolve, reject) => {
 	const xhtml =
 `<?xml version="1.0" encoding="utf-8" ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
@@ -65,6 +66,7 @@ Promise.all(promises).then(([babel, react, reactRedux, redux]) => new Promise((r
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react${ prod ? ".min" : "" }.js" defer="defer" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react-dom${ prod ? ".min" : "" }.js" defer="defer" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/${ redux }/redux${ prod ? ".min" : "" }.js" defer="defer" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/${ reduxThunk }/redux-thunk${ prod ? ".min" : "" }.js" defer="defer" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/${ reactRedux }/react-redux${ prod ? ".min" : "" }.js" defer="defer" />
 		<script src="index.js" defer="defer" />
 	</head>
