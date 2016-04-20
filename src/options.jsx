@@ -345,7 +345,14 @@ function _Options({
 export const Actions = makeUniqueActions({
 	onVideoChoiceChanged: videoChoice => ({ videoChoice }),
 
-	onVideoFileChanged: videoFile => ({ videoFile }),
+	onVideoFileChanged: videoFile => (dispatch, getState) => {
+		const { options: { videoFile: previousVideoFile } } = getState();
+		if (previousVideoFile !== null) {
+			URL.revokeObjectURL(previousVideoFile);
+		}
+
+		dispatch({ type: Actions.onVideoFileChanged.type, payload: { videoFile } });
+	},
 
 	onVideoUrlChanged: videoUrl => ({ videoUrl }),
 
@@ -357,7 +364,14 @@ export const Actions = makeUniqueActions({
 
 	onAssChoiceChanged: assChoice => ({ assChoice }),
 
-	onAssFileChanged: assFile => ({ assFile }),
+	onAssFileChanged: assFile => (dispatch, getState) => {
+		const { options: { assFile: previousAssFile } } = getState();
+		if (previousAssFile !== null) {
+			URL.revokeObjectURL(previousAssFile);
+		}
+
+		dispatch({ type: Actions.onAssFileChanged.type, payload: { assFile } });
+	},
 
 	onAssUrlChanged: assUrl => ({ assUrl }),
 
@@ -415,17 +429,7 @@ export const reducer = createReducer({
 }, {
 	[Actions.onVideoChoiceChanged.type]: (state, { videoChoice }) => ({ ...state, videoChoice }),
 
-	[Actions.onVideoFileChanged.type]: (state, { videoFile }) => {
-		const { videoFile: previousVideoFile } = state;
-		if (previousVideoFile !== null) {
-			URL.revokeObjectURL(previousVideoFile);
-		}
-
-		return {
-			...state,
-			videoFile,
-		};
-	},
+	[Actions.onVideoFileChanged.type]: (state, { videoFile }) => ({ ...state, videoFile }),
 
 	[Actions.onVideoUrlChanged.type]: (state, { videoUrl }) => ({ ...state, videoUrl }),
 
@@ -437,17 +441,7 @@ export const reducer = createReducer({
 
 	[Actions.onAssChoiceChanged.type]: (state, { assChoice }) => ({ ...state, assChoice }),
 
-	[Actions.onAssFileChanged.type]: (state, { assFile }) => {
-		const { assFile: previousAssFile } = state;
-		if (previousAssFile !== null) {
-			URL.revokeObjectURL(previousAssFile);
-		}
-
-		return {
-			...state,
-			assFile,
-		};
-	},
+	[Actions.onAssFileChanged.type]: (state, { assFile }) => ({ ...state, assFile }),
 
 	[Actions.onAssUrlChanged.type]: (state, { assUrl }) => ({ ...state, assUrl }),
 
