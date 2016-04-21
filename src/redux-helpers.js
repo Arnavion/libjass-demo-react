@@ -26,7 +26,7 @@ export function makeUniqueActions(actions) {
 	for (const key of Object.keys(actions)) {
 		const payloadCreator = actions[key];
 
-		const type = lastActionId++;
+		const type = `${ lastActionId++ }-${ key }`;
 
 		const action = (...args) => {
 			const payload = payloadCreator(...args);
