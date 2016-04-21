@@ -84,18 +84,23 @@ const Actions = makeUniqueActions({
 	},
 
 	onAdd: (type, items) => {
+		let hasNonPrimitives = false;
+
 		const text = items.reduce((text, item) => {
 			switch (typeof item) {
 				case "boolean":
 				case "number":
 				case "string":
-					return `${ text }${ item } `;
+					break;
 				default:
-					return `${ text }${ item } [Check browser console for more details.] `;
+					hasNonPrimitives = true;
+					break;
 			}
-		}, `${ new Date().toString() }: `);
 
-		return { type, text };
+			return `${ text } ${ item }`;
+		}, `${ new Date().toString() }:`);
+
+		return { type, text: hasNonPrimitives ? `${ text } [Check browser console for more details.]` : text };
 	},
 
 	onEnableDisableDebugMode: debugMode => dispatch => {
