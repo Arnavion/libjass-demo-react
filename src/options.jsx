@@ -85,7 +85,7 @@ function _Options({
 			case VideoChoice.LocalFile:
 				return videoFile !== null;
 			case VideoChoice.Url:
-				return videoUrl !== null;
+				return videoUrl !== null && videoUrl.length > 0;
 			case VideoChoice.Sample:
 				return true;
 			case VideoChoice.Dummy:
@@ -98,7 +98,7 @@ function _Options({
 			case AssChoice.LocalFile:
 				return assFile !== null;
 			case AssChoice.Url:
-				return assUrl !== null;
+				return assUrl !== null && assUrl.length > 0;
 			case AssChoice.Text:
 				return assText !== null;
 		}
@@ -143,13 +143,7 @@ function _Options({
 						</label>
 						<input type="url"
 							value={ (videoUrl === null) ? "" : videoUrl }
-							onChange={ event =>
-								onVideoUrlChanged(
-									(event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
-										event.target.value :
-										null
-								)
-							}
+							onChange={ event => onVideoUrlChanged(event.target.value) }
 						/>
 					</li>
 					<li>
@@ -255,13 +249,7 @@ function _Options({
 						</label>
 						<input type="url"
 							value={ (assUrl === null) ? "" : assUrl }
-							onChange={ event =>
-								onAssUrlChanged(
-									(event.target.parentElement.querySelector(":invalid") === null && event.target.value.length > 0) ?
-										event.target.value :
-										null
-								)
-							}
+							onChange={ event => onAssUrlChanged(event.target.value) }
 						/>
 					</li>
 					<li>
