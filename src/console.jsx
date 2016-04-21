@@ -94,20 +94,20 @@ const Actions = makeUniqueActions({
 		return { type, text };
 	},
 
-	onEnableDisableDebugMode: debugMode => () => {
+	onEnableDisableDebugMode: debugMode => dispatch => {
 		console.log(`${ debugMode ? "Enabling" : "Disabling" } debug mode.`);
 
 		libjass.debugMode = debugMode;
 
-		return { debugMode };
+		dispatch({ type: Actions.onEnableDisableDebugMode.type, payload: { debugMode } });
 	},
 
-	onEnableDisableVerboseMode: verboseMode => () => {
+	onEnableDisableVerboseMode: verboseMode => dispatch => {
 		console.log(`${ verboseMode ? "Enabling" : "Disabling" } verbose mode.`);
 
 		libjass.verboseMode = verboseMode;
 
-		return { verboseMode };
+		dispatch({ type: Actions.onEnableDisableVerboseMode.type, payload: { verboseMode } });
 	},
 
 	onClear: () => undefined,
