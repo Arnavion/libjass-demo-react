@@ -26,6 +26,8 @@ import { createReducer, makeUniqueActions } from "./redux-helpers";
 
 function _Console({
 	entries,
+	debugMode,
+	verboseMode,
 
 	onEnableDisableDebugMode,
 	onEnableDisableVerboseMode,
@@ -37,11 +39,13 @@ function _Console({
 				Console output
 				<label>
 					<input type="checkbox"
+						checked={ debugMode }
 						onChange={ event => onEnableDisableDebugMode(event.target.checked) }
 					/> Enable debug mode
 				</label>
 				<label>
 					<input type="checkbox"
+						checked={ verboseMode }
 						onChange={ event => onEnableDisableVerboseMode(event.target.checked) }
 					/> Enable verbose mode
 				</label>
@@ -117,6 +121,8 @@ export const Console = connect(({ console }) => console, Actions)(class extends 
 	render() {
 		const {
 			entries,
+			debugMode,
+			verboseMode,
 
 			onEnableDisableDebugMode,
 			onEnableDisableVerboseMode,
@@ -126,6 +132,8 @@ export const Console = connect(({ console }) => console, Actions)(class extends 
 		return (
 			<_Console { ...{
 				entries,
+				debugMode,
+				verboseMode,
 
 				onEnableDisableDebugMode,
 				onEnableDisableVerboseMode,
