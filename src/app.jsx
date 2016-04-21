@@ -22,15 +22,53 @@ import React from "react";
 import { connect } from "react-redux";
 import { combineReducers } from "redux";
 
-import { Console, reducer as consoleReducer } from "./console.jsx";
-import { Actions as OptionsActions, Options, reducer as optionsReducer } from "./options.jsx";
+import { connect as connectConsole } from "./console.jsx";
+import { connect as connectOptions } from "./options.jsx";
 import { createReducer } from "./redux-helpers";
-import { Video, reducer as videoReducer } from "./video.jsx";
+import { connect as connectVideo } from "./video.jsx";
 
 const Screens = {
 	Options: 0,
 	Video: 1,
 };
+
+const { Console, reducer: consoleReducer } = connectConsole(({ console }) => console);
+const { Actions: OptionsActions, Options, reducer: optionsReducer } = connectOptions(({ options }) => options);
+const { Video, reducer: videoReducer } = connectVideo(({
+	video,
+
+	options: {
+		videoChoice,
+		videoFile,
+		videoUrl,
+		videoDummyResolution,
+		videoDummyColor,
+		videoDummyDuration,
+
+		assChoice,
+		assFile,
+		assUrl,
+		assText,
+
+		enableSvg
+	},
+}) => ({
+	...video,
+
+	videoChoice,
+	videoFile,
+	videoUrl,
+	videoDummyResolution,
+	videoDummyColor,
+	videoDummyDuration,
+
+	assChoice,
+	assFile,
+	assUrl,
+	assText,
+
+	enableSvg,
+}));
 
 export const App = connect(({ app }) => app, {})(({
 	currentScreen,

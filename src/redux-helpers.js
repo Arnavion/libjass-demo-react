@@ -20,7 +20,7 @@
 
 let lastActionId = 0;
 
-export function makeUniqueActions(actions) {
+export function makeUniqueActions(mapStateToProps, actions) {
 	const result = Object.create(null);
 
 	for (const key of Object.keys(actions)) {
@@ -32,7 +32,7 @@ export function makeUniqueActions(actions) {
 			const payload = payloadCreator(...args);
 
 			return (typeof payload === "function") ?
-				(dispatch, getState) => ({ type, payload: payload(dispatch, getState) }) :
+				(dispatch, getState) => ({ type, payload: payload(dispatch, mapStateToProps(getState())) }) :
 				{ type, payload };
 		};
 

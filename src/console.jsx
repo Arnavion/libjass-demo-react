@@ -20,7 +20,7 @@
 
 import libjass from "libjass";
 import React, { Component } from "react";
-import { connect } from "react-redux";
+import { connect as reduxConnect } from "react-redux";
 
 import { createReducer, makeUniqueActions } from "./redux-helpers";
 
@@ -62,115 +62,123 @@ function _Console({
 	);
 }
 
-const Actions = makeUniqueActions({
-	onMount: () => dispatch => {
-		const originalConsoleLog = console.log.bind(console);
-		console.log = (...items) => {
-			originalConsoleLog(...items);
-			dispatch(Actions.onAdd("log", items));
-		};
+export function connect(mapStateToProps) {
+	const Actions = makeUniqueActions(mapStateToProps, {
+		onMount: () => dispatch => {
+			const originalConsoleLog = console.log.bind(console);
+			console.log = (...items) => {
+				originalConsoleLog(...items);
+				dispatch(Actions.onAdd("log", items));
+			};
 
-		const originalConsoleWarn = console.warn.bind(console);
-		console.warn = (...items) => {
-			originalConsoleWarn(...items);
-			dispatch(Actions.onAdd("warning", items));
-		};
+			const originalConsoleWarn = console.warn.bind(console);
+			console.warn = (...items) => {
+				originalConsoleWarn(...items);
+				dispatch(Actions.onAdd("warning", items));
+			};
 
-		const originalConsoleError = console.error.bind(console);
-		console.error = (...items) => {
-			originalConsoleError(...items);
-			dispatch(Actions.onAdd("error", items));
-		};
-	},
+			const originalConsoleError = console.error.bind(console);
+			console.error = (...items) => {
+				originalConsoleError(...items);
+				dispatch(Actions.onAdd("error", items));
+			};
+		},
 
-	onAdd: (type, items) => {
-		let hasNonPrimitives = false;
+		onAdd: (type, items) => {
+			let hasNonPrimitives = false;
 
-		const text = items.reduce((text, item) => {
-			switch (typeof item) {
-				case "boolean":
-				case "number":
-				case "string":
-					break;
-				default:
-					hasNonPrimitives = true;
-					break;
-			}
+			const text = items.reduce((text, item) => {
+				switch (typeof item) {
+					case "boolean":
+					case "number":
+					case "string":
+						break;
+					default:
+						hasNonPrimitives = true;
+						break;
+				}
 
-			return `${ text } ${ item }`;
-		}, `${ new Date().toString() }:`);
+				return `${ text } ${ item }`;
+			}, `${ new Date().toString() }:`);
 
-		return { type, text: hasNonPrimitives ? `${ text } [Check browser console for more details.]` : text };
-	},
+			return { type, text: hasNonPrimitives ? `${ text } [Check browser console for more details.]` : text };
+		},
 
-	onEnableDisableDebugMode: debugMode => dispatch => {
-		console.log(`${ debugMode ? "Enabling" : "Disabling" } debug mode.`);
+		onEnableDisableDebugMode: debugMode => dispatch => {
+			console.log(`${ debugMode ? "Enabling" : "Disabling" } debug mode.`);
 
-		libjass.debugMode = debugMode;
+			libjass.debugMode = debugMode;
 
-		dispatch({ type: Actions.onEnableDisableDebugMode.type, payload: { debugMode } });
-	},
+			dispatch({ type: Actions.onEnableDisableDebugMode.type, payload: { debugMode } });
+		},
 
-	onEnableDisableVerboseMode: verboseMode => dispatch => {
-		console.log(`${ verboseMode ? "Enabling" : "Disabling" } verbose mode.`);
+		onEnableDisableVerboseMode: verboseMode => dispatch => {
+			console.log(`${ verboseMode ? "Enabling" : "Disabling" } verbose mode.`);
 
-		libjass.verboseMode = verboseMode;
+			libjass.verboseMode = verboseMode;
 
-		dispatch({ type: Actions.onEnableDisableVerboseMode.type, payload: { verboseMode } });
-	},
+			dispatch({ type: Actions.onEnableDisableVerboseMode.type, payload: { verboseMode } });
+		},
 
-	onClear: () => undefined,
-});
+		onClear: () => undefined,
+	});
 
-export const Console = connect(({ console }) => console, Actions)(class extends Component {
-	render() {
-		const {
-			entries,
-			debugMode,
-			verboseMode,
-
-			onEnableDisableDebugMode,
-			onEnableDisableVerboseMode,
-			onClear,
-		} = this.props;
-
-		return (
-			<_Console { ...{
+	const Console = reduxConnect(mapStateToProps, Actions)(class extends Component {
+		render() {
+			const {
 				entries,
 				debugMode,
 				verboseMode,
 
 				onEnableDisableDebugMode,
 				onEnableDisableVerboseMode,
-				onClear
-			} } />
-		);
-	}
+				onClear,
+			} = this.props;
 
-	componentDidMount() {
-		this.props.onMount();
-	}
-});
+			return (
+				<_Console { ...{
+					entries,
+					debugMode,
+					verboseMode,
 
-export const reducer = createReducer({
-	entries: [],
-	lastItemId: 0,
+					onEnableDisableDebugMode,
+					onEnableDisableVerboseMode,
+					onClear,
+				} } />
+			);
+		}
 
-	debugMode: false,
-	verboseMode: false,
-}, {
-	[Actions.onAdd.type]: (state, { type, text }) => ({
-		...state,
-		entries: [
-			...state.entries,
-			{ id: state.lastItemId, type, text },
-		],
-		lastItemId: state.lastItemId + 1,
-	}),
+		componentDidMount() {
+			this.props.onMount();
+		}
+	});
 
-	[Actions.onEnableDisableDebugMode.type]: (state, { debugMode }) => ({ ...state, debugMode }),
+	const reducer = createReducer({
+		entries: [],
+		lastItemId: 0,
 
-	[Actions.onEnableDisableVerboseMode.type]: (state, { verboseMode }) => ({ ...state, verboseMode }),
+		debugMode: false,
+		verboseMode: false,
+	}, {
+		[Actions.onAdd.type]: (state, { type, text }) => ({
+			...state,
+			entries: [
+				...state.entries,
+				{ id: state.lastItemId, type, text },
+			],
+			lastItemId: state.lastItemId + 1,
+		}),
 
-	[Actions.onClear.type]: state => ({ ...state, entries: [] }),
-});
+		[Actions.onEnableDisableDebugMode.type]: (state, { debugMode }) => ({ ...state, debugMode }),
+
+		[Actions.onEnableDisableVerboseMode.type]: (state, { verboseMode }) => ({ ...state, verboseMode }),
+
+		[Actions.onClear.type]: state => ({ ...state, entries: [] }),
+	});
+
+	return {
+		Actions,
+		Console,
+		reducer,
+	};
+};
