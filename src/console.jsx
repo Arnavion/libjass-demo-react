@@ -33,6 +33,9 @@ function _Console({
 	onEnableDisableVerboseMode,
 	onClear,
 }) {
+	libjass.debugMode = debugMode;
+	libjass.verboseMode = verboseMode;
+
 	return (
 		<fieldset className="console">
 			<legend>
@@ -107,15 +110,11 @@ export function connect(mapStateToProps) {
 		onEnableDisableDebugMode: debugMode => dispatch => {
 			console.log(`${ debugMode ? "Enabling" : "Disabling" } debug mode.`);
 
-			libjass.debugMode = debugMode;
-
 			dispatch({ type: Actions.onEnableDisableDebugMode.type, payload: { debugMode } });
 		},
 
 		onEnableDisableVerboseMode: verboseMode => dispatch => {
 			console.log(`${ verboseMode ? "Enabling" : "Disabling" } verbose mode.`);
-
-			libjass.verboseMode = verboseMode;
 
 			dispatch({ type: Actions.onEnableDisableVerboseMode.type, payload: { verboseMode } });
 		},
