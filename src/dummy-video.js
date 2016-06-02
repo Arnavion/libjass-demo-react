@@ -99,7 +99,7 @@ function newMediaSourceAndBuffer(video, type) {
 	return new Promise((resolve, reject) => {
 		const mediaSource = new MediaSource();
 
-		function onSourceOpen() {
+		mediaSource.addEventListener("sourceopen", function onSourceOpen() {
 			mediaSource.removeEventListener("sourceopen", onSourceOpen, false);
 
 			try {
@@ -110,9 +110,7 @@ function newMediaSourceAndBuffer(video, type) {
 			catch (ex) {
 				reject(ex);
 			}
-		}
-
-		mediaSource.addEventListener("sourceopen", onSourceOpen, false);
+		}, false);
 
 		video.src = URL.createObjectURL(mediaSource);
 	});
@@ -141,7 +139,7 @@ function appendBuffer(sourceBuffer, buffer) {
 	return new Promise((resolve, reject) => {
 		const currentEndTime = getEndTime(sourceBuffer);
 
-		function onUpdateEnd() {
+		sourceBuffer.addEventListener("updateend", function onUpdateEnd() {
 			sourceBuffer.removeEventListener("updateend", onUpdateEnd, false);
 
 			if (sourceBuffer.buffered.length === 0) {
@@ -156,9 +154,7 @@ function appendBuffer(sourceBuffer, buffer) {
 			}
 
 			resolve();
-		}
-
-		sourceBuffer.addEventListener("updateend", onUpdateEnd, false);
+		}, false);
 
 		sourceBuffer.timestampOffset = currentEndTime;
 		sourceBuffer.appendBuffer(buffer);
