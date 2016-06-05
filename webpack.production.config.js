@@ -28,7 +28,9 @@ config.plugins = [
 		"process.env": {
 			NODE_ENV: '"production"'
 		}
-	})
+	}),
+	new webpack.optimize.UglifyJsPlugin(),
+	new webpack.optimize.OccurenceOrderPlugin()
 ];
 
 config.resolve.alias["libjass"] = path.resolve(require.resolve("libjass"), "..", "libjass.min.js");

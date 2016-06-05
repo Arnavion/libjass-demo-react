@@ -22,8 +22,45 @@ import { createHash } from "crypto";
 import { readFile, writeFile } from "fs";
 import request from "request";
 import { satisfies } from "semver";
+import webpack from "webpack";
 
 const prod = process.argv[2] === "prod";
+
+const webpackConfig = require(`./webpack${ prod ? ".production" : "" }.config.js`);
+
+const webpackIndexJs = new Promise((resolve, reject) => webpack(webpackConfig, (err, stats) => {
+	if (err) {
+		reject(err);
+		return;
+	}
+
+	const { compilation: { errors, warnings } } = stats;
+
+	if (errors.length !== 0) {
+		for (const { message } of errors) {
+			console.error(message);
+		}
+
+		reject();
+		return;
+	}
+
+	if (warnings.length !== 0) {
+		for (const { message } of warnings) {
+			for (const warning of message.split("\n")) {
+				if (
+					warning.indexOf("from UglifyJs") === -1 &&
+					warning.indexOf("libjass.min.js:") === -1 &&
+					warning.indexOf("style-loader") === -1
+				) {
+					console.warn(warning);
+				}
+			}
+		}
+	}
+
+	resolve();
+}));
 
 const getUrlBody = url => new Promise((resolve, reject) => request(url, (err, response, body) => {
 	if (err) {
@@ -90,7 +127,7 @@ Promise.all(
 			Promise.all(urlsFunc(version).map(url =>
 				getUrlBody(url).then(body =>
 					getScriptTag(url, getHash(body)))))))
-	.concat(getFileBody("./www/index.js").then(body => getScriptTag("index.js", getHash(body))))
+	.concat(webpackIndexJs.then(() => getFileBody("./www/index.js")).then(body => getScriptTag("index.js", getHash(body))))
 )
 	.then(([
 		[babelScriptTag],

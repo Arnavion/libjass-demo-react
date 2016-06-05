@@ -31,8 +31,8 @@
 		"webpack": "1.13.x"
 	},
 	"scripts": {
-		"build": "webpack && babel-node --presets es2015 ./src/index.xhtml.js",
-		"build-prod": "webpack -p --config webpack.production.config.js && babel-node --presets es2015 ./src/index.xhtml.js prod",
+		"build": "babel-node --presets es2015 ./build.js",
+		"build-prod": "babel-node --presets es2015 ./build.js prod",
 		"install": "npm run build"
 	},
 	"private": true
