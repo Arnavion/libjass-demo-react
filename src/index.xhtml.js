@@ -18,57 +18,100 @@
  * limitations under the License.
  */
 
-var prod = process.argv[2] === "prod";
-
-import { writeFile } from "fs";
+import { createHash } from "crypto";
+import { readFile, writeFile } from "fs";
 import request from "request";
 import { satisfies } from "semver";
 
-const promises = [
-	["babel-polyfill", "6.x"],
-	["react", "15.x"],
-	["react-redux", "4.x"],
-	["redux", "3.x"],
-	["redux-thunk", "2.x"]
-].map(([name, requiredVersion]) => new Promise((resolve, reject) =>
-		request(`https://api.cdnjs.com/libraries/${ name }`, (err, response, body) => {
-		if (err) {
-			reject(err);
-			return;
+const prod = process.argv[2] === "prod";
+
+const getUrlBody = url => new Promise((resolve, reject) => request(url, (err, response, body) => {
+	if (err) {
+		reject(err);
+		return;
+	}
+
+	if (response.statusCode !== 200) {
+		reject(response.statusCode);
+		return;
+	}
+
+	resolve(body);
+}));
+
+const getFileBody = filename => new Promise((resolve, reject) => readFile(filename, (err, body) => {
+	if (err) {
+		reject(err);
+		return;
+	}
+
+	resolve(body);
+}));
+
+const getVersion = (name, requiredVersion) => getUrlBody(`https://api.cdnjs.com/libraries/${ name }`).then(body => {
+	const json = JSON.parse(body);
+
+	for (const { version } of json.assets) {
+		if (satisfies(version, requiredVersion)) {
+			return version;
 		}
+	}
 
-		if (response.statusCode !== 200) {
-			reject(response.statusCode);
-			return;
-		}
+	throw new Error(`No version found for ${ name }:${ requiredVersion }.`);
+});
 
-		resolve(body);
-	})).then(body => {
-		const json = JSON.parse(body);
+const getHash = body => {
+	const hash = createHash("sha384");
+	hash.update(body);
+	return `sha384-${ hash.digest("base64") }`;
+};
 
-		for (const { version } of json.assets) {
-			if (satisfies(version, requiredVersion)) {
-				return version;
-			}
-		}
+const getScriptTag = (url, hash) => `<script src="${ url }" integrity="${ hash }" crossorigin="anonymous" defer="defer" />`;
 
-		throw new Error(`No version found for ${ name }:${ requiredVersion }.`);
-	})
-);
+const webScripts = [
+	["babel-polyfill", "6.x",
+		babelVersion => [`https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${ babelVersion }/polyfill${ prod ? ".min" : "" }.js`]],
+	["react", "15.x",
+		reactVersion => [
+			`https://cdnjs.cloudflare.com/ajax/libs/react/${ reactVersion }/react${ prod ? ".min" : "" }.js`,
+			`https://cdnjs.cloudflare.com/ajax/libs/react/${ reactVersion }/react-dom${ prod ? ".min" : "" }.js`
+		]],
+	["react-redux", "4.x",
+		reactReduxVersion => [`https://cdnjs.cloudflare.com/ajax/libs/react-redux/${ reactReduxVersion }/react-redux${ prod ? ".min" : "" }.js`]],
+	["redux", "3.x",
+		reduxVersion => [`https://cdnjs.cloudflare.com/ajax/libs/redux/${ reduxVersion }/redux${ prod ? ".min" : "" }.js`]],
+	["redux-thunk", "2.x",
+		reduxThunkVersion => [`https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/${ reduxThunkVersion }/redux-thunk${ prod ? ".min" : "" }.js`]]
+];
 
-Promise.all(promises).then(([babel, react, reactRedux, redux, reduxThunk]) => new Promise((resolve, reject) => {
-	const xhtml =
+Promise.all(
+	webScripts.map(([name, requiredVersion, urlsFunc]) =>
+		getVersion(name, requiredVersion).then(version =>
+			Promise.all(urlsFunc(version).map(url =>
+				getUrlBody(url).then(body =>
+					getScriptTag(url, getHash(body)))))))
+	.concat(getFileBody("./www/index.js").then(body => getScriptTag("index.js", getHash(body))))
+)
+	.then(([
+		[babelScriptTag],
+		[reactScriptTag, reactDomScriptTag],
+		[reactReduxScriptTag],
+		[reduxScriptTag],
+		[reduxThunkScriptTag],
+		indexJsScriptTag
+	]) => new Promise((resolve, reject) => {
+		const xhtml =
 `<?xml version="1.0" encoding="utf-8" ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>libjass demo</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${ babel }/polyfill${ prod ? ".min" : "" }.js" defer="defer" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react${ prod ? ".min" : "" }.js" defer="defer" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/${ react }/react-dom${ prod ? ".min" : "" }.js" defer="defer" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/${ redux }/redux${ prod ? ".min" : "" }.js" defer="defer" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/${ reduxThunk }/redux-thunk${ prod ? ".min" : "" }.js" defer="defer" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/${ reactRedux }/react-redux${ prod ? ".min" : "" }.js" defer="defer" />
-		<script src="index.js" defer="defer" />
+		${ babelScriptTag }
+		${ reactScriptTag }
+		${ reactDomScriptTag }
+		${ reduxScriptTag }
+		${ reduxThunkScriptTag }
+		${ reactReduxScriptTag }
+		${ indexJsScriptTag }
 	</head>
 	<body>
 		<div id="root" />
@@ -76,14 +119,15 @@ Promise.all(promises).then(([babel, react, reactRedux, redux, reduxThunk]) => ne
 </html>
 `;
 
-	writeFile("./www/index.xhtml", xhtml, "utf-8", err => {
-		if (err) {
-			reject(err);
-			return;
-		}
-		resolve();
+		writeFile("./www/index.xhtml", xhtml, "utf-8", err => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			resolve();
+		});
+	}))
+	.catch(reason => {
+		console.error(reason);
+		process.exit(1);
 	});
-})).catch(reason => {
-	console.error(reason);
-	process.exit(1);
-});
