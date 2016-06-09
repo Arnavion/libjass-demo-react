@@ -39,6 +39,17 @@ export function makeDummyVideo(video, width, height, color, duration) {
 
 		recorder.start(1); // Get as many events as possible to have a chance at getting the smallest possible chunk.
 
+		requestAnimationFrame(function drawCanvas() {
+			if (recorder.state === "inactive") {
+				return;
+			}
+
+			requestAnimationFrame(drawCanvas);
+
+			context.fillRect(0, 0, 0, 0);
+			stream.requestFrame();
+		});
+
 		let blob = null;
 
 		recorder.addEventListener("dataavailable", event => {
