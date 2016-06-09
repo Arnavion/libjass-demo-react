@@ -23,9 +23,6 @@
  */
 export function makeDummyVideo(video, width, height, color, duration) {
 	return new Promise((resolve, reject) => {
-		video.width = width;
-		video.height = height;
-
 		const canvas = document.createElement("canvas");
 		canvas.width = width;
 		canvas.height = height;
