@@ -18,6 +18,19 @@
  * limitations under the License.
  */
 
+const mimeType = "video/webm";
+
+export function isDummyVideoSupported() {
+	return (
+		typeof HTMLCanvasElement.prototype.captureStream === "function" &&
+		typeof MediaRecorder !== "undefined" &&
+		MediaRecorder.isTypeSupported(mimeType) &&
+		typeof MediaSource !== "undefined" &&
+		typeof MediaSource.isTypeSupported === "function" &&
+		MediaSource.isTypeSupported(mimeType)
+	);
+};
+
 /**
  * Creates a video of the given color, dimensions and duration, and prepares the given video element to play it.
  */
@@ -32,7 +45,7 @@ export function makeDummyVideo(video, width, height, color, duration) {
 		context.fillRect(0, 0, width, height);
 
 		const stream = canvas.captureStream(0);
-		const recorder = new MediaRecorder(stream);
+		const recorder = new MediaRecorder(stream, { mimeType });
 
 		recorder.start(1); // Get as many events as possible to have a chance at getting the smallest possible chunk.
 
@@ -64,22 +77,13 @@ export function makeDummyVideo(video, width, height, color, duration) {
 
 			if (blob === null) {
 				blob = event.data;
-				if (!MediaSource.isTypeSupported(blob.type)) {
-					/* MediaRecorder may record a format that MediaSource doesn't support. As of Nightly 46, this is true, since MediaRecorder
-					 * records webm which MediaSource doesn't play unless media.mediasource.webm.enabled is true in about:config
-					 */
-
-					recorder.stop();
-					reject(new Error(`MediaRecorder is recording video in ${ blob.type } but MediaSource doesn't support it. Make sure media.mediasource.webm.enabled is on in about:config`));
-					return;
-				}
 			}
 			else {
-				blob = new Blob([blob, event.data], { type: blob.type });
+				blob = new Blob([blob, event.data], { type: mimeType });
 			}
 
 			// Data is available but may not contain any frames. Test for that.
-			Promise.all([newMediaSourceAndBuffer(video, blob.type), blobToArrayBuffer(blob)]).then(([[mediaSource, sourceBuffer], buffer]) =>
+			Promise.all([newMediaSourceAndBuffer(video), blobToArrayBuffer(blob)]).then(([[mediaSource, sourceBuffer], buffer]) =>
 				appendBuffer(sourceBuffer, buffer).then(() => {
 					console.log(`Got enough data for ${ getEndTime(sourceBuffer) } seconds.`);
 
@@ -101,9 +105,9 @@ export function makeDummyVideo(video, width, height, color, duration) {
 }
 
 /**
- * Sets up the given `video` to use a new MediaSource, and appends a new SourceBuffer of the given `type`.
+ * Sets up the given `video` to use a new MediaSource, and appends a new SourceBuffer.
  */
-function newMediaSourceAndBuffer(video, type) {
+function newMediaSourceAndBuffer(video) {
 	return new Promise((resolve, reject) => {
 		const mediaSource = new MediaSource();
 
@@ -111,7 +115,7 @@ function newMediaSourceAndBuffer(video, type) {
 			mediaSource.removeEventListener("sourceopen", onSourceOpen, false);
 
 			try {
-				const sourceBuffer = mediaSource.addSourceBuffer(type);
+				const sourceBuffer = mediaSource.addSourceBuffer(mimeType);
 
 				resolve([mediaSource, sourceBuffer]);
 			}

@@ -22,6 +22,7 @@ import libjass from "libjass";
 import React from "react";
 import { connect as reduxConnect } from "react-redux";
 
+import { isDummyVideoSupported } from "./dummy-video";
 import { createReducer, makeUniqueActions } from "./redux-helpers";
 
 import defaultAssText from "raw!./default.ass";
@@ -72,13 +73,7 @@ function _Options({
 	onSelected,
 }) {
 	const fileInputsEnabled = (typeof URL !== "undefined" && typeof URL.createObjectURL === "function");
-	const dummyVideoEnabled = (
-		typeof HTMLCanvasElement.prototype.captureStream === "function" &&
-		typeof MediaRecorder !== "undefined" &&
-		typeof MediaSource !== "undefined" &&
-		typeof MediaSource.isTypeSupported === "function"/* &&
-		MediaSource.isTypeSupported("video/webm")*/
-	);
+	const dummyVideoEnabled = isDummyVideoSupported();
 
 	const videoOk = (() => {
 		switch (videoChoice) {
