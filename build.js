@@ -86,9 +86,9 @@ const getFileBody = filename => new Promise((resolve, reject) => readFile(filena
 }));
 
 const getVersion = (name, requiredVersion) => getUrlBody(`https://api.cdnjs.com/libraries/${ name }`).then(body => {
-	const json = JSON.parse(body);
+	const { assets } = JSON.parse(body);
 
-	for (const { version } of json.assets) {
+	for (const { version } of assets) {
 		if (satisfies(version, requiredVersion)) {
 			return version;
 		}
@@ -156,7 +156,7 @@ Promise.all(
 </html>
 `;
 
-		writeFile("./www/index.xhtml", xhtml, "utf-8", err => {
+		writeFile("./www/index.xhtml", xhtml, "utf8", err => {
 			if (err) {
 				reject(err);
 				return;
