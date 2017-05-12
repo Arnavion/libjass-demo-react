@@ -18,21 +18,29 @@
  * limitations under the License.
  */
 
-var path = require("path");
-var webpack = require("webpack");
+const path = require("path");
+const webpack = require("webpack");
 
-var config = require("./webpack.config");
+const config = require("./webpack.config");
 
-config.plugins = [
-	new webpack.DefinePlugin({
-		"process.env": {
-			NODE_ENV: '"production"'
-		}
-	}),
-	new webpack.optimize.UglifyJsPlugin(),
-	new webpack.optimize.OccurenceOrderPlugin()
-];
-
-config.resolve.alias["libjass"] = path.resolve(require.resolve("libjass"), "..", "libjass.min.js");
-
-module.exports = config;
+module.exports = {
+	...config,
+	plugins: [
+		new webpack.DefinePlugin({
+			"process.env": {
+				NODE_ENV: '"production"'
+			}
+		}),
+		new webpack.optimize.UglifyJsPlugin(),
+		new webpack.LoaderOptionsPlugin({
+			minimize: true,
+		}),
+	],
+	resolve: {
+		...config.resolve,
+		alias: {
+			...config.resolve.alias,
+			libjass: path.resolve(require.resolve("libjass"), "..", "libjass.min.js"),
+		},
+	},
+};

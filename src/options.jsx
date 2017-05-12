@@ -25,7 +25,7 @@ import { connect as reduxConnect } from "react-redux";
 import { isDummyVideoSupported } from "./dummy-video";
 import { createReducer, makeUniqueActions } from "./redux-helpers";
 
-import defaultAssText from "raw!./default.ass";
+import defaultAssText from "raw-loader!./default.ass";
 
 export const VideoChoice = {
 	LocalFile: 0,

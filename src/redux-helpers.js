@@ -23,9 +23,7 @@ let lastActionId = 0;
 export function makeUniqueActions(mapStateToProps, actions) {
 	const result = Object.create(null);
 
-	for (const key of Object.keys(actions)) {
-		const payloadCreator = actions[key];
-
+	for (const [key, payloadCreator] of Object.entries(actions)) {
 		const type = `${ lastActionId++ }-${ key }`;
 
 		const action = (...args) => {

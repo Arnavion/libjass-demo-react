@@ -18,44 +18,45 @@
  * limitations under the License.
  */
 
-var path = require("path");
-var webpack = require("webpack");
+const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
 	entry: "./src/index.jsx",
 	output: { path: __dirname, filename: "./www/index.js" },
 	module: {
-		loaders: [{
+		rules: [{
 			test: /\.jsx?$/,
 			loader: "babel-loader",
 			exclude: /node_modules/,
-			query: {
+			options: {
 				compact: false,
 				plugins: [
-					"transform-class-properties",
-					"syntax-object-rest-spread",
-					"transform-object-rest-spread"
+					"transform-object-rest-spread",
 				],
 				presets: [
 					"es2015",
-					"react"
-				]
-			}
+					"react",
+				],
+			},
 		}, {
 			test: /\.css$/,
-			loader: "style-loader!css-loader"
-		}]
+			use: [
+				"style-loader",
+				"css-loader",
+			],
+		}],
 	},
 	externals: {
 		"react": "React",
 		"react-dom": "ReactDOM",
 		"react-redux": "ReactRedux",
 		"redux": "Redux",
-		"redux-thunk": "ReduxThunk"
+		"redux-thunk": "ReduxThunk",
 	},
 	resolve: {
 		alias: {
-			"libjass.css": path.resolve(require.resolve("libjass"), "..", "libjass.css")
-		}
+			"libjass.css": path.resolve(require.resolve("libjass"), "..", "libjass.css"),
+		},
 	},
 };

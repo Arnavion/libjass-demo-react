@@ -113,12 +113,12 @@ const webScripts = [
 			`https://cdnjs.cloudflare.com/ajax/libs/react/${ reactVersion }/react${ prod ? ".min" : "" }.js`,
 			`https://cdnjs.cloudflare.com/ajax/libs/react/${ reactVersion }/react-dom${ prod ? ".min" : "" }.js`
 		]],
-	["react-redux", "4.x",
+	["react-redux", "5.x",
 		reactReduxVersion => [`https://cdnjs.cloudflare.com/ajax/libs/react-redux/${ reactReduxVersion }/react-redux${ prod ? ".min" : "" }.js`]],
 	["redux", "3.x",
 		reduxVersion => [`https://cdnjs.cloudflare.com/ajax/libs/redux/${ reduxVersion }/redux${ prod ? ".min" : "" }.js`]],
 	["redux-thunk", "2.x",
-		reduxThunkVersion => [`https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/${ reduxThunkVersion }/redux-thunk${ prod ? ".min" : "" }.js`]]
+		reduxThunkVersion => [`https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/${ reduxThunkVersion }/redux-thunk${ prod ? ".min" : "" }.js`]],
 ];
 
 Promise.all(
@@ -135,7 +135,7 @@ Promise.all(
 		[reactReduxScriptTag],
 		[reduxScriptTag],
 		[reduxThunkScriptTag],
-		indexJsScriptTag
+		indexJsScriptTag,
 	]) => new Promise((resolve, reject) => {
 		const xhtml =
 `<?xml version="1.0" encoding="utf-8" ?>
