@@ -1,3 +1,9 @@
+This repository is no longer maintained.
+
+If you have questions about this repository, open an issue at https://github.com/Arnavion/archived-repos-issues
+
+---
+
 A version of [libjass's](https://github.com/Arnavion/libjass) online [demo](https://arnavion.github.io/libjass/demo/index.xhtml) using [React.](https://facebook.github.io/react/) Compare with the original demo's source [here.](https://github.com/Arnavion/libjass/tree/gh-pages/demo)
 
 See live [here.](https://arnavion.github.io/libjass-demo-react/)
